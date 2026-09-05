@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import LogoutButton from "@/components/LogoutButton";
 import DashboardNav from "@/components/DashboardNav";
+import DonateButton from "@/components/DonateButton";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
 
@@ -36,6 +37,9 @@ export default async function DashboardLayout({
         </div>
       </header>
       <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">{children}</main>
+      <footer className="mx-auto max-w-4xl px-4 pb-8 text-center sm:px-6">
+        <DonateButton variant="quiet" />
+      </footer>
     </div>
   );
 }

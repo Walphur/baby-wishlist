@@ -3,6 +3,7 @@ import Image from "next/image";
 import DecorativeBlobs from "@/components/DecorativeBlobs";
 import FloatingBear from "@/components/FloatingBear";
 import RevealOnScroll from "@/components/RevealOnScroll";
+import DonateButton from "@/components/DonateButton";
 
 const STEPS = [
   {
@@ -147,10 +148,18 @@ export default function LandingPage() {
             ))}
           </ul>
         </div>
+        <div className="mt-6">
+          <RevealOnScroll>
+            <DonateButton variant="card" />
+          </RevealOnScroll>
+        </div>
       </section>
 
       <footer className="relative z-10 border-t border-ink-900/10 px-6 py-8 text-center text-xs text-ink-700">
-        Baby Wishlist — hecho con cariño para futuras familias.
+        <p>Baby Wishlist — hecho con cariño para futuras familias.</p>
+        <div className="mt-3">
+          <DonateButton variant="quiet" />
+        </div>
       </footer>
     </main>
   );

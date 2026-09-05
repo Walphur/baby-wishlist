@@ -3,6 +3,7 @@ import Image from "next/image";
 import GoogleLoginButton from "@/components/GoogleLoginButton";
 import DecorativeBlobs from "@/components/DecorativeBlobs";
 import FloatingBear from "@/components/FloatingBear";
+import DonateButton from "@/components/DonateButton";
 
 export default function LoginPage() {
   return (
@@ -41,6 +42,9 @@ export default function LoginPage() {
           motion="float-delay"
           className="h-28 w-28 shrink-0 sm:h-40 sm:w-40 lg:h-48 lg:w-48"
         />
+      </div>
+      <div className="absolute bottom-6 left-0 right-0 z-10 text-center">
+        <DonateButton variant="quiet" />
       </div>
     </main>
   );
