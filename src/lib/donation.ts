@@ -1,4 +1,4 @@
-// Link de pago o perfil de Mercado Pago (mpago.la / link.mercadopago.com.ar).
-export const MP_DONATION_URL = (
-  process.env.NEXT_PUBLIC_MP_DONATION_URL || ""
+// Alias de Mercado Pago para transferencia (sin comisión de link de pago).
+export const MP_DONATION_ALIAS = (
+  process.env.NEXT_PUBLIC_MP_DONATION_ALIAS || ""
 ).trim();

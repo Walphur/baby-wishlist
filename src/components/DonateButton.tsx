@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MP_DONATION_URL } from "@/lib/donation";
+import { MP_DONATION_ALIAS } from "@/lib/donation";
 
 type DonateButtonProps = {
   variant?: "card" | "footer" | "quiet";
@@ -9,6 +9,7 @@ type DonateButtonProps = {
 
 export default function DonateButton({ variant = "footer" }: DonateButtonProps) {
   const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -19,7 +20,17 @@ export default function DonateButton({ variant = "footer" }: DonateButtonProps) 
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  if (!MP_DONATION_URL) return null;
+  if (!MP_DONATION_ALIAS) return null;
+
+  async function copyAlias() {
+    try {
+      await navigator.clipboard.writeText(MP_DONATION_ALIAS);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard no disponible
+    }
+  }
 
   return (
     <>
@@ -27,15 +38,15 @@ export default function DonateButton({ variant = "footer" }: DonateButtonProps) 
         <div className="rounded-xl2 border border-ink-900/10 bg-white/70 p-6 text-center">
           <p className="font-serif text-xl text-ink-900">La web es gratis</p>
           <p className="mx-auto mt-2 max-w-sm text-sm text-ink-700">
-            Si te sirvió para el baby shower, una donación por Mercado Pago
-            ayuda a mantenerla.
+            Si te sirvió, podés transferir al alias. Es una transferencia, no
+            un link de pago: no come comisión.
           </p>
           <button
             type="button"
             onClick={() => setOpen(true)}
             className="mt-5 rounded-full bg-ink-900 px-6 py-2.5 text-sm font-medium text-cream-50 transition hover:bg-ink-800"
           >
-            Donar con Mercado Pago
+            Donar por alias
           </button>
         </div>
       ) : (
@@ -69,24 +80,26 @@ export default function DonateButton({ variant = "footer" }: DonateButtonProps) 
               Gracias por sostenerla
             </h2>
             <p className="mt-2 text-sm text-ink-700">
-              Escaneá el QR con Mercado Pago. En el celular también podés abrir
-              el link.
+              En Mercado Pago: Transferir → pegá el alias. No uses link de
+              pago, ese sí cobra el 6,29%.
+            </p>
+            <p className="mt-5 font-serif text-2xl tracking-wide text-ink-900">
+              {MP_DONATION_ALIAS}
             </p>
             <img
               src="/api/donation-qr"
-              alt="QR para donar por Mercado Pago"
+              alt={`QR con el alias ${MP_DONATION_ALIAS}`}
               width={280}
               height={280}
-              className="mx-auto mt-5 h-56 w-56 rounded-xl2 border border-ink-900/10 bg-white p-3"
+              className="mx-auto mt-4 h-44 w-44 rounded-xl2 border border-ink-900/10 bg-white p-3"
             />
-            <a
-              href={MP_DONATION_URL}
-              target="_blank"
-              rel="noreferrer"
+            <button
+              type="button"
+              onClick={copyAlias}
               className="mt-5 inline-flex rounded-full bg-ink-900 px-5 py-2.5 text-sm font-medium text-cream-50 transition hover:bg-ink-800"
             >
-              Abrir Mercado Pago
-            </a>
+              {copied ? "¡Alias copiado!" : "Copiar alias"}
+            </button>
             <button
               type="button"
               onClick={() => setOpen(false)}
