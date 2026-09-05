@@ -28,6 +28,16 @@ const config: Config = {
           500: "#C9A664",
           600: "#B08F4F",
         },
+        blush: {
+          100: "#F6E4DE",
+          200: "#EFCFC5",
+          300: "#E4B3A4",
+          400: "#D69682",
+        },
+        terracotta: {
+          400: "#C97C5D",
+          500: "#B8663F",
+        },
         ink: {
           700: "#4A463D",
           800: "#3A362E",
@@ -35,11 +45,22 @@ const config: Config = {
         },
       },
       fontFamily: {
-        serif: ["var(--font-playfair)", "Georgia", "serif"],
+        serif: ["var(--font-heading)", "system-ui", "sans-serif"],
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
       },
       borderRadius: {
         xl2: "1.25rem",
+      },
+      keyframes: {
+        float: {
+          "0%, 100%": { transform: "translateY(0px) rotate(-3deg)" },
+          "50%": { transform: "translateY(-16px) rotate(3deg)" },
+        },
+      },
+      animation: {
+        float: "float 6s ease-in-out infinite",
+        "float-slow": "float 8s ease-in-out infinite",
+        "float-delay": "float 7s ease-in-out infinite 1.5s",
       },
     },
   },

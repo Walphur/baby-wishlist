@@ -3,6 +3,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import DisclaimerBanner from "@/components/DisclaimerBanner";
 import PublicGiftList from "@/components/PublicGiftList";
 import RsvpForm from "@/components/RsvpForm";
+import DecorativeBlobs from "@/components/DecorativeBlobs";
+import FloatingBear from "@/components/FloatingBear";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +17,9 @@ export default async function EventPage({
 
   const { data: event } = await supabase
     .from("baby_events")
-    .select("id, baby_name, event_date, location, host_names, message")
+    .select(
+      "id, baby_name, event_date, location, host_names, message, ask_party_size, location_map_url, drive_url, invitation_image_url"
+    )
     .eq("slug", params.slug)
     .maybeSingle();
 
@@ -23,7 +27,7 @@ export default async function EventPage({
 
   const { data: gifts } = await supabase
     .from("baby_gifts")
-    .select("id, event_id, name, category, notes, is_custom, created_at")
+    .select("id, event_id, name, category, notes, is_custom, max_quantity, created_at")
     .eq("event_id", event.id)
     .order("category");
 
@@ -32,11 +36,15 @@ export default async function EventPage({
     giftIds.length > 0
       ? await supabase.from("baby_claims").select("gift_id").in("gift_id", giftIds)
       : { data: [] };
-  const claimedIds = new Set((claims ?? []).map((c) => c.gift_id));
+  const claimCounts = new Map<string, number>();
+  for (const c of claims ?? []) {
+    claimCounts.set(c.gift_id, (claimCounts.get(c.gift_id) ?? 0) + 1);
+  }
 
   const giftsWithClaim = (gifts ?? []).map((g) => ({
     ...g,
-    claimed: claimedIds.has(g.id),
+    claimed: (claimCounts.get(g.id) ?? 0) > 0,
+    claimedCount: claimCounts.get(g.id) ?? 0,
   }));
 
   const formattedDate = event.event_date
@@ -49,7 +57,16 @@ export default async function EventPage({
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-14">
-      <div className="text-center">
+      <DecorativeBlobs />
+      <div className="relative text-center">
+        <FloatingBear
+          variant="bear"
+          className="absolute left-0 top-0 hidden h-14 w-14 animate-float sm:block"
+        />
+        <FloatingBear
+          variant="fox"
+          className="absolute right-2 top-6 hidden h-11 w-11 animate-float-delay sm:block"
+        />
         <span className="text-xs font-medium uppercase tracking-widest text-sage-600">
           Baby Shower
         </span>
@@ -71,10 +88,41 @@ export default async function EventPage({
             “{event.message}”
           </p>
         )}
+        {(event.location_map_url || event.drive_url) && (
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+            {event.location_map_url && (
+              <a
+                href={event.location_map_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-lg border border-ink-900/15 bg-white/70 px-4 py-2 text-xs font-medium text-ink-800 transition hover:bg-white sm:text-sm"
+              >
+                📍 Ver ubicación en el mapa
+              </a>
+            )}
+            {event.drive_url && (
+              <a
+                href={event.drive_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-lg border border-ink-900/15 bg-white/70 px-4 py-2 text-xs font-medium text-ink-800 transition hover:bg-white sm:text-sm"
+              >
+                📷 Ver / subir fotos
+              </a>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="mt-10 space-y-8">
-        <RsvpForm slug={params.slug} />
+        {event.invitation_image_url && (
+          <img
+            src={event.invitation_image_url}
+            alt="Invitación"
+            className="mx-auto w-full max-w-md rounded-xl2 border border-ink-900/10 object-cover shadow-sm"
+          />
+        )}
+        <RsvpForm slug={params.slug} askPartySize={event.ask_party_size} />
         <DisclaimerBanner />
         <PublicGiftList slug={params.slug} gifts={giftsWithClaim} />
       </div>

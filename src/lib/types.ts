@@ -8,6 +8,11 @@ export type EventRow = {
   host_names: string | null;
   photo_url: string | null;
   message: string | null;
+  ask_party_size: boolean;
+  location_map_url: string | null;
+  drive_url: string | null;
+  invitation_image_url: string | null;
+  guest_list_reveal_days: number;
   created_at: string;
   updated_at: string;
 };
@@ -19,10 +24,11 @@ export type GiftRow = {
   category: string | null;
   notes: string | null;
   is_custom: boolean;
+  max_quantity: number | null;
   created_at: string;
 };
 
-export type GiftWithClaim = GiftRow & { claimed: boolean };
+export type GiftWithClaim = GiftRow & { claimed: boolean; claimedCount: number };
 
 export type RsvpRow = {
   id: string;

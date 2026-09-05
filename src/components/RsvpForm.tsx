@@ -3,7 +3,13 @@
 import { useRef, useState, useTransition } from "react";
 import { submitRsvp } from "@/app/e/[slug]/actions";
 
-export default function RsvpForm({ slug }: { slug: string }) {
+export default function RsvpForm({
+  slug,
+  askPartySize = true,
+}: {
+  slug: string;
+  askPartySize?: boolean;
+}) {
   const formRef = useRef<HTMLFormElement>(null);
   const [isPending, startTransition] = useTransition();
   const [attending, setAttending] = useState<"yes" | "no">("yes");
@@ -56,7 +62,7 @@ export default function RsvpForm({ slug }: { slug: string }) {
           </label>
         </div>
 
-        {attending === "yes" && (
+        {attending === "yes" && askPartySize && (
           <label className="block">
             <span className="text-sm text-ink-800">
               ¿Cuántas personas van (incluyéndote)?

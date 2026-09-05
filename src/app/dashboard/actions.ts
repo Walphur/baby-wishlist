@@ -62,6 +62,7 @@ export async function createEvent(formData: FormData) {
     name: g.name,
     category: g.category,
     is_custom: false,
+    max_quantity: g.maxQuantity ?? null,
   }));
   await supabase.from("baby_gifts").insert(seedGifts);
 
@@ -81,6 +82,14 @@ export async function updateEvent(eventId: string, formData: FormData) {
   const location = clean(formData.get("location"), MAX_TEXT);
   const host_names = clean(formData.get("host_names"), MAX_TEXT);
   const message = clean(formData.get("message"), MAX_MESSAGE);
+  const location_map_url = clean(formData.get("location_map_url"), 500);
+  const drive_url = clean(formData.get("drive_url"), 500);
+  const invitation_image_url = clean(formData.get("invitation_image_url"), 500);
+  const ask_party_size = formData.get("ask_party_size") === "on";
+  const guest_list_reveal_days = Math.min(
+    Math.max(Number(formData.get("guest_list_reveal_days") ?? 14) || 14, 0),
+    365
+  );
 
   await supabase
     .from("baby_events")
@@ -90,6 +99,11 @@ export async function updateEvent(eventId: string, formData: FormData) {
       location,
       host_names,
       message,
+      location_map_url,
+      drive_url,
+      invitation_image_url,
+      ask_party_size,
+      guest_list_reveal_days,
       updated_at: new Date().toISOString(),
     })
     .eq("id", eventId)
@@ -121,6 +135,7 @@ export async function resetDefaultGifts(eventId: string) {
     name: g.name,
     category: g.category,
     is_custom: false,
+    max_quantity: g.maxQuantity ?? null,
   }));
   await supabase.from("baby_gifts").insert(seedGifts);
 
@@ -136,11 +151,13 @@ export async function addOwnerGift(eventId: string, formData: FormData) {
 
   const name = clean(formData.get("name"), 120);
   const category = clean(formData.get("category"), 60);
+  const maxQuantityRaw = Number(formData.get("max_quantity") ?? 0);
+  const max_quantity = maxQuantityRaw > 1 ? Math.min(Math.round(maxQuantityRaw), 50) : null;
   if (!name) return;
 
   await supabase
     .from("baby_gifts")
-    .insert({ event_id: eventId, name, category, is_custom: true });
+    .insert({ event_id: eventId, name, category, is_custom: true, max_quantity });
 
   revalidatePath("/dashboard/regalos");
 }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import LogoutButton from "@/components/LogoutButton";
 
 export default function DashboardLayout({
@@ -9,11 +10,18 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen">
       <header className="border-b border-ink-900/10 bg-white/50">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
-          <Link href="/dashboard" className="font-serif text-lg text-sage-700">
-            Baby Wishlist
+        <div className="mx-auto flex max-w-4xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <Link href="/dashboard" className="block">
+            <Image
+              src="/brand/wordmark.png"
+              alt="Baby Wishlist"
+              width={150}
+              height={50}
+              className="h-9 w-auto sm:h-10"
+              priority
+            />
           </Link>
-          <nav className="flex items-center gap-4 text-sm">
+          <nav className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
             <Link href="/dashboard" className="text-ink-700 hover:text-ink-900">
               Resumen
             </Link>

@@ -18,7 +18,7 @@ export default async function RegalosPage() {
 
   const { data: gifts } = await supabase
     .from("baby_gifts")
-    .select("id, name, category, is_custom")
+    .select("id, name, category, is_custom, max_quantity")
     .eq("event_id", event.id)
     .order("category");
 
@@ -27,7 +27,10 @@ export default async function RegalosPage() {
     giftIds.length > 0
       ? await supabase.from("baby_claims").select("gift_id").in("gift_id", giftIds)
       : { data: [] };
-  const claimedIds = new Set((claims ?? []).map((c) => c.gift_id));
+  const claimCounts = new Map<string, number>();
+  for (const c of claims ?? []) {
+    claimCounts.set(c.gift_id, (claimCounts.get(c.gift_id) ?? 0) + 1);
+  }
 
   const grouped = new Map<string, typeof gifts>();
   for (const gift of gifts ?? []) {
@@ -66,35 +69,41 @@ export default async function RegalosPage() {
               {category}
             </h2>
             <ul className="mt-2 divide-y divide-ink-900/10 rounded-xl2 border border-ink-900/10 bg-white/60">
-              {items!.map((gift) => (
-                <li
-                  key={gift.id}
-                  className="flex items-center justify-between gap-3 px-4 py-3"
-                >
-                  <span
-                    className={
-                      claimedIds.has(gift.id)
-                        ? "text-sm text-ink-700 line-through"
-                        : "text-sm text-ink-900"
-                    }
+              {items!.map((gift) => {
+                const count = claimCounts.get(gift.id) ?? 0;
+                const isFull = gift.max_quantity ? count >= gift.max_quantity : count > 0;
+                return (
+                  <li
+                    key={gift.id}
+                    className="flex items-center justify-between gap-3 px-4 py-3"
                   >
-                    {gift.name}
-                    {claimedIds.has(gift.id) && (
-                      <span className="ml-2 rounded-full bg-sage-100 px-2 py-0.5 text-[10px] font-medium text-sage-700 no-underline">
-                        Reservado
-                      </span>
-                    )}
-                  </span>
-                  <form action={deleteGift.bind(null, gift.id)}>
-                    <button
-                      type="submit"
-                      className="text-xs text-ink-700/60 hover:text-red-600"
+                    <span
+                      className={
+                        isFull
+                          ? "text-sm text-ink-700 line-through"
+                          : "text-sm text-ink-900"
+                      }
                     >
-                      Quitar
-                    </button>
-                  </form>
-                </li>
-              ))}
+                      {gift.name}
+                      {count > 0 && (
+                        <span className="ml-2 rounded-full bg-sage-100 px-2 py-0.5 text-[10px] font-medium text-sage-700 no-underline">
+                          {gift.max_quantity
+                            ? `${count}/${gift.max_quantity} reservado`
+                            : "Reservado"}
+                        </span>
+                      )}
+                    </span>
+                    <form action={deleteGift.bind(null, gift.id)}>
+                      <button
+                        type="submit"
+                        className="text-xs text-ink-700/60 hover:text-red-600"
+                      >
+                        Quitar
+                      </button>
+                    </form>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         ))}
@@ -114,7 +123,14 @@ export default async function RegalosPage() {
           <input
             name="category"
             placeholder="Categoría (opcional)"
-            className="w-40 rounded-lg border border-ink-900/15 bg-white px-3 py-2 text-sm outline-none focus:border-sage-500"
+            className="w-full rounded-lg border border-ink-900/15 bg-white px-3 py-2 text-sm outline-none focus:border-sage-500 sm:w-36"
+          />
+          <input
+            name="max_quantity"
+            type="number"
+            min={2}
+            placeholder="Cant. máx (opcional)"
+            className="w-full rounded-lg border border-ink-900/15 bg-white px-3 py-2 text-sm outline-none focus:border-sage-500 sm:w-36"
           />
           <button
             type="submit"

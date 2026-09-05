@@ -10,7 +10,7 @@ export default async function InvitadosPage() {
 
   const { data: event } = await supabase
     .from("baby_events")
-    .select("id")
+    .select("id, event_date, guest_list_reveal_days")
     .eq("user_id", user!.id)
     .maybeSingle();
 
@@ -20,11 +20,22 @@ export default async function InvitadosPage() {
     .from("baby_rsvps")
     .select("id, guest_name, attending, party_size, note, created_at")
     .eq("event_id", event.id)
-    .order("created_at", { ascending: false });
+    .order("guest_name", { ascending: true });
 
   const confirmed = (rsvps ?? []).filter((r) => r.attending);
   const declined = (rsvps ?? []).filter((r) => !r.attending);
   const totalPeople = confirmed.reduce((sum, r) => sum + r.party_size, 0);
+
+  const daysUntilEvent = event.event_date
+    ? Math.ceil(
+        (new Date(event.event_date + "T00:00:00").getTime() - Date.now()) /
+          (1000 * 60 * 60 * 24)
+      )
+    : null;
+  const revealNames =
+    daysUntilEvent === null ||
+    daysUntilEvent <= event.guest_list_reveal_days ||
+    (rsvps ?? []).length >= 10;
 
   return (
     <div className="max-w-2xl space-y-8">
@@ -56,6 +67,14 @@ export default async function InvitadosPage() {
           Todavía nadie confirmó asistencia. Compartí el link de tu evento
           desde el resumen del dashboard.
         </p>
+      ) : !revealNames ? (
+        <div className="rounded-xl2 border border-dashed border-ink-900/20 p-4 text-sm text-ink-700">
+          Los nombres se muestran {event.guest_list_reveal_days} días antes
+          del evento (o antes si ya hay 10 o más confirmados). Es a propósito:
+          así no se puede relacionar quién confirmó con qué regalo reservó, ya
+          que los regalos son anónimos. Por ahora solo ves los totales de
+          arriba. Podés cambiar esto en “Datos del evento”.
+        </div>
       ) : (
         <ul className="divide-y divide-ink-900/10 rounded-xl2 border border-ink-900/10 bg-white/60">
           {(rsvps ?? []).map((r) => (

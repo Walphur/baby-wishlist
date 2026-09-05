@@ -19,11 +19,23 @@ create table if not exists public.baby_events (
   host_names text,
   photo_url text,
   message text,
+  ask_party_size boolean not null default true,
+  location_map_url text,
+  drive_url text,
+  invitation_image_url text,
+  guest_list_reveal_days integer not null default 14,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
 create unique index if not exists baby_events_user_id_key on public.baby_events(user_id);
+
+-- Migración: agrega las columnas nuevas si la tabla ya existía de antes.
+alter table public.baby_events add column if not exists ask_party_size boolean not null default true;
+alter table public.baby_events add column if not exists location_map_url text;
+alter table public.baby_events add column if not exists drive_url text;
+alter table public.baby_events add column if not exists invitation_image_url text;
+alter table public.baby_events add column if not exists guest_list_reveal_days integer not null default 14;
 
 -- ============ BABY_GIFTS ============
 create table if not exists public.baby_gifts (
@@ -33,13 +45,19 @@ create table if not exists public.baby_gifts (
   category text,
   notes text,
   is_custom boolean not null default false,
+  max_quantity integer,
   created_at timestamptz not null default now()
 );
 
 create index if not exists baby_gifts_event_id_idx on public.baby_gifts(event_id);
 
+-- Migración: agrega la columna de cantidad máxima (regalos "repetibles" como pañales/ropa).
+alter table public.baby_gifts add column if not exists max_quantity integer;
+
 -- ============ BABY_CLAIMS ============
--- Una fila = un regalo "tildado" como que alguien lo va a llevar.
+-- Una fila = una persona que avisó que va a llevar ese regalo.
+-- Los regalos con max_quantity permiten varias filas (varias personas);
+-- los regalos sin max_quantity solo permiten una (se controla desde el código).
 -- A propósito NO se guarda quién lo reservó: es 100% anónimo.
 create table if not exists public.baby_claims (
   id uuid primary key default gen_random_uuid(),
@@ -47,7 +65,10 @@ create table if not exists public.baby_claims (
   created_at timestamptz not null default now()
 );
 
-create unique index if not exists baby_claims_gift_id_key on public.baby_claims(gift_id);
+create index if not exists baby_claims_gift_id_idx on public.baby_claims(gift_id);
+
+-- Migración: si venís de la versión anterior, esto permite varias reservas por regalo.
+drop index if exists public.baby_claims_gift_id_key;
 
 -- ============ BABY_RSVPS ============
 -- Confirmaciones de asistencia. A diferencia de los "claims", acá SÍ se
@@ -75,32 +96,44 @@ alter table public.baby_gifts enable row level security;
 alter table public.baby_claims enable row level security;
 alter table public.baby_rsvps enable row level security;
 
+-- Nota: "create policy" no soporta IF NOT EXISTS, por eso primero se
+-- borra (si existe) y se vuelve a crear. Esto hace que el script completo
+-- se pueda re-ejecutar sin errores cuando se agregan columnas nuevas.
+drop policy if exists "baby_events_owner_select" on public.baby_events;
 create policy "baby_events_owner_select" on public.baby_events
   for select using (auth.uid() = user_id);
+drop policy if exists "baby_events_owner_insert" on public.baby_events;
 create policy "baby_events_owner_insert" on public.baby_events
   for insert with check (auth.uid() = user_id);
+drop policy if exists "baby_events_owner_update" on public.baby_events;
 create policy "baby_events_owner_update" on public.baby_events
   for update using (auth.uid() = user_id);
+drop policy if exists "baby_events_owner_delete" on public.baby_events;
 create policy "baby_events_owner_delete" on public.baby_events
   for delete using (auth.uid() = user_id);
 
+drop policy if exists "baby_gifts_owner_select" on public.baby_gifts;
 create policy "baby_gifts_owner_select" on public.baby_gifts
   for select using (
     exists (select 1 from public.baby_events e where e.id = baby_gifts.event_id and e.user_id = auth.uid())
   );
+drop policy if exists "baby_gifts_owner_insert" on public.baby_gifts;
 create policy "baby_gifts_owner_insert" on public.baby_gifts
   for insert with check (
     exists (select 1 from public.baby_events e where e.id = baby_gifts.event_id and e.user_id = auth.uid())
   );
+drop policy if exists "baby_gifts_owner_update" on public.baby_gifts;
 create policy "baby_gifts_owner_update" on public.baby_gifts
   for update using (
     exists (select 1 from public.baby_events e where e.id = baby_gifts.event_id and e.user_id = auth.uid())
   );
+drop policy if exists "baby_gifts_owner_delete" on public.baby_gifts;
 create policy "baby_gifts_owner_delete" on public.baby_gifts
   for delete using (
     exists (select 1 from public.baby_events e where e.id = baby_gifts.event_id and e.user_id = auth.uid())
   );
 
+drop policy if exists "baby_claims_owner_select" on public.baby_claims;
 create policy "baby_claims_owner_select" on public.baby_claims
   for select using (
     exists (
@@ -110,10 +143,12 @@ create policy "baby_claims_owner_select" on public.baby_claims
     )
   );
 
+drop policy if exists "baby_rsvps_owner_select" on public.baby_rsvps;
 create policy "baby_rsvps_owner_select" on public.baby_rsvps
   for select using (
     exists (select 1 from public.baby_events e where e.id = baby_rsvps.event_id and e.user_id = auth.uid())
   );
+drop policy if exists "baby_rsvps_owner_delete" on public.baby_rsvps;
 create policy "baby_rsvps_owner_delete" on public.baby_rsvps
   for delete using (
     exists (select 1 from public.baby_events e where e.id = baby_rsvps.event_id and e.user_id = auth.uid())

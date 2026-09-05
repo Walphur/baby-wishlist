@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Inter } from "next/font/google";
+import { Fredoka, Inter } from "next/font/google";
 import "./globals.css";
 
-const playfair = Playfair_Display({
+const fredoka = Fredoka({
   subsets: ["latin"],
-  variable: "--font-playfair",
+  variable: "--font-heading",
   weight: ["500", "600", "700"],
 });
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -23,10 +23,11 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body
-        className={`${playfair.variable} ${inter.variable} font-sans bg-cream-100 text-ink-900 antialiased`}
+        className={`${fredoka.variable} ${inter.variable} font-sans bg-gradient-to-b from-cream-50 via-cream-100 to-sage-50 text-ink-900 antialiased`}
       >
         {children}
       </body>
     </html>
   );
 }
+
