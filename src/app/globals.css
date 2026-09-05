@@ -8,15 +8,68 @@ html {
 
 .reveal-on-scroll {
   opacity: 0;
-  transform: translateY(28px);
+  transform: translateY(36px);
   transition:
-    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 800ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 800ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .reveal-on-scroll.is-visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+@keyframes mascot-bob {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-4deg);
+  }
+  50% {
+    transform: translate3d(0, -28px, 0) rotate(5deg);
+  }
+}
+
+@keyframes mascot-bob-alt {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(3deg);
+  }
+  50% {
+    transform: translate3d(6px, -24px, 0) rotate(-4deg);
+  }
+}
+
+@keyframes scroll-nudge {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translateY(10px);
+    opacity: 1;
+  }
+}
+
+.mascot-float,
+.mascot-float-slow,
+.mascot-float-delay {
+  will-change: transform;
+  animation: mascot-bob 3.6s ease-in-out infinite;
+}
+
+.mascot-float-slow {
+  animation-duration: 4.8s;
+}
+
+.mascot-float-delay {
+  animation-name: mascot-bob-alt;
+  animation-duration: 4.2s;
+  animation-delay: 0.6s;
+}
+
+.scroll-nudge {
+  animation: scroll-nudge 1.4s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -31,11 +84,10 @@ html {
     transition: none;
   }
 
-  .animate-fox-float,
-  .animate-float,
-  .animate-float-slow,
-  .animate-float-delay,
-  .animate-bounce {
-    animation: none !important;
+  .mascot-float,
+  .mascot-float-slow,
+  .mascot-float-delay,
+  .scroll-nudge {
+    animation: none;
   }
 }

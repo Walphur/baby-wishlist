@@ -61,11 +61,13 @@ export default async function EventPage({
       <div className="relative text-center">
         <FloatingBear
           variant="bear"
-          className="absolute left-0 top-0 hidden h-14 w-14 animate-float sm:block"
+          motion="float"
+          className="absolute left-0 top-0 h-14 w-14"
         />
         <FloatingBear
           variant="fox"
-          className="absolute right-2 top-6 hidden h-11 w-11 animate-float-delay sm:block"
+          motion="float-delay"
+          className="absolute right-0 top-4 h-12 w-12"
         />
         <span className="text-xs font-medium uppercase tracking-widest text-sage-600">
           Baby Shower

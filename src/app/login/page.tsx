@@ -10,13 +10,15 @@ export default function LoginPage() {
       <DecorativeBlobs />
       <FloatingBear
         variant="bear"
-        className="absolute left-8 top-12 hidden h-32 w-32 animate-float sm:block lg:left-16 lg:h-44 lg:w-44"
+        motion="float"
+        className="absolute left-3 top-8 h-24 w-24 sm:left-10 sm:top-12 sm:h-36 sm:w-36 lg:left-16 lg:h-44 lg:w-44"
       />
       <FloatingBear
         variant="fox"
-        className="absolute right-10 bottom-14 hidden h-28 w-28 animate-float-delay sm:block lg:right-20 lg:bottom-16 lg:h-40 lg:w-40"
+        motion="float-delay"
+        className="absolute right-3 bottom-8 h-24 w-24 sm:right-10 sm:bottom-14 sm:h-36 sm:w-36 lg:right-16 lg:h-44 lg:w-44"
       />
-      <div className="w-full max-w-sm rounded-xl2 border border-ink-900/10 bg-white/60 p-8 text-center shadow-sm">
+      <div className="relative z-10 w-full max-w-sm rounded-xl2 border border-ink-900/10 bg-white/70 p-8 text-center shadow-sm">
         <Link href="/" className="mx-auto flex w-full justify-center">
           <Image
             src="/brand/wordmark.png"
@@ -31,8 +33,8 @@ export default function LoginPage() {
           Iniciá sesión
         </h1>
         <p className="mt-2 text-sm text-ink-700">
-          Usá tu cuenta de Google para crear y administrar la lista de tu
-          baby shower. Es gratis, no pedimos tarjeta ni contraseña.
+          Usá tu cuenta de Google para crear y administrar la lista. Sin
+          tarjeta ni contraseña.
         </p>
         <div className="mt-6">
           <GoogleLoginButton />
@@ -41,4 +43,3 @@ export default function LoginPage() {
     </main>
   );
 }
-

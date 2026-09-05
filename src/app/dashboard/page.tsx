@@ -61,16 +61,25 @@ export default async function DashboardPage() {
 
   const { data: gifts } = await supabase
     .from("baby_gifts")
-    .select("id")
+    .select("id, name")
     .eq("event_id", event.id);
   const giftIds = (gifts ?? []).map((g) => g.id);
-  const { count: claimedCount } =
+  const { data: claims } =
     giftIds.length > 0
-      ? await supabase
-          .from("baby_claims")
-          .select("id", { count: "exact", head: true })
-          .in("gift_id", giftIds)
-      : { count: 0 };
+      ? await supabase.from("baby_claims").select("gift_id").in("gift_id", giftIds)
+      : { data: [] };
+  const claimCounts = new Map<string, number>();
+  for (const claim of claims ?? []) {
+    claimCounts.set(claim.gift_id, (claimCounts.get(claim.gift_id) ?? 0) + 1);
+  }
+  const reservedGifts = (gifts ?? [])
+    .map((gift) => ({
+      id: gift.id,
+      name: gift.name,
+      count: claimCounts.get(gift.id) ?? 0,
+    }))
+    .filter((gift) => gift.count > 0);
+  const claimedCount = reservedGifts.reduce((sum, gift) => sum + gift.count, 0);
 
   const { data: rsvps } = await supabase
     .from("baby_rsvps")
@@ -137,6 +146,27 @@ export default async function DashboardPage() {
           <p className="mt-1 font-serif text-3xl text-ink-900">{confirmedPeople}</p>
         </div>
       </div>
+
+      {reservedGifts.length > 0 && (
+        <div className="rounded-xl2 border border-ink-900/10 bg-white/60 p-6">
+          <p className="text-sm font-medium text-ink-900">
+            Regalos ya reservados
+          </p>
+          <ul className="mt-3 divide-y divide-ink-900/10">
+            {reservedGifts.map((gift) => (
+              <li
+                key={gift.id}
+                className="flex items-center justify-between gap-3 py-2 text-sm"
+              >
+                <span className="text-ink-800">{gift.name}</span>
+                <span className="rounded-full bg-sage-100 px-2 py-0.5 text-xs text-sage-700">
+                  {gift.count === 1 ? "Reservado" : `${gift.count} reservas`}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-3">
         <Link
