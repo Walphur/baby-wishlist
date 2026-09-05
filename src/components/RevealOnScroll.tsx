@@ -6,13 +6,15 @@ type RevealOnScrollProps = {
   children: ReactNode;
   className?: string;
   delayMs?: number;
+  shift?: number;
 };
 
-// Aparece suavemente cuando el bloque entra en pantalla.
+// Aparece al entrar en vista. Estilos inline: Windows "reducir movimiento" mata el CSS.
 export default function RevealOnScroll({
   children,
   className = "",
   delayMs = 0,
+  shift = 64,
 }: RevealOnScrollProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -28,7 +30,7 @@ export default function RevealOnScroll({
           observer.disconnect();
         }
       },
-      { threshold: 0.22, rootMargin: "0px 0px -8% 0px" }
+      { threshold: 0.2, rootMargin: "0px 0px -18% 0px" }
     );
 
     observer.observe(node);
@@ -38,8 +40,15 @@ export default function RevealOnScroll({
   return (
     <div
       ref={ref}
-      style={{ transitionDelay: `${delayMs}ms` }}
-      className={`reveal-on-scroll ${visible ? "is-visible" : ""} ${className}`}
+      className={`w-full ${className}`}
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible
+          ? "translate3d(0, 0, 0)"
+          : `translate3d(0, ${shift}px, 0)`,
+        transition: `opacity 800ms cubic-bezier(0.22, 1, 0.36, 1) ${delayMs}ms, transform 800ms cubic-bezier(0.22, 1, 0.36, 1) ${delayMs}ms`,
+        willChange: "opacity, transform",
+      }}
     >
       {children}
     </div>
