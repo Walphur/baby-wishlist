@@ -84,9 +84,6 @@ html {
     transition: none;
   }
 
-  .mascot-float,
-  .mascot-float-slow,
-  .mascot-float-delay,
   .scroll-nudge {
     animation: none;
   }

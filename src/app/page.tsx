@@ -47,38 +47,41 @@ export default function LandingPage() {
         </Link>
       </header>
 
-      <section className="relative z-10 flex min-h-[calc(100svh-5.5rem)] flex-col items-center justify-center px-6 pb-10 text-center">
-        <FloatingBear
-          variant="bear"
-          motion="float"
-          className="absolute left-3 top-8 h-20 w-20 sm:left-8 sm:top-10 sm:h-28 sm:w-28 lg:left-16 lg:h-32 lg:w-32"
-        />
-        <FloatingBear
-          variant="fox"
-          motion="float-delay"
-          className="absolute right-2 top-6 h-36 w-36 opacity-90 sm:right-8 sm:h-52 sm:w-52 lg:right-16 lg:h-64 lg:w-64"
-        />
-
-        <h1 className="relative max-w-xl font-serif text-4xl leading-[1.15] text-ink-900 sm:text-5xl lg:text-[3.35rem]">
-          Una lista de regalos para recibir a tu bebé.
-        </h1>
-        <p className="relative mt-5 max-w-md text-sm text-ink-700 sm:text-base">
-          Clara, compartible y sin vueltas. Para papás, padrinos y quien
-          organice el encuentro.
-        </p>
-        <Link
-          href="/login"
-          className="relative mt-8 rounded-full bg-ink-900 px-8 py-3.5 text-sm font-medium text-cream-50 shadow-sm transition hover:bg-ink-800"
-        >
-          Crear mi lista
-        </Link>
-        <div className="relative mt-12 flex flex-col items-center gap-2">
-          <p className="text-xs tracking-wide text-ink-700/80">
-            Deslizá para ver cómo se usa
-          </p>
-          <span aria-hidden="true" className="scroll-nudge text-2xl text-sage-600">
-            ↓
-          </span>
+      <section className="relative z-10 flex min-h-[calc(100svh-5.5rem)] items-center px-4 pb-10 sm:px-8">
+        <div className="mx-auto grid w-fit max-w-[92vw] grid-cols-2 items-center gap-x-3 gap-y-6 sm:grid-cols-[auto_auto_auto] sm:gap-x-5 lg:gap-x-6">
+          <FloatingBear
+            variant="bear"
+            motion="float"
+            className="h-28 w-28 justify-self-end sm:h-40 sm:w-40 lg:h-48 lg:w-48"
+          />
+          <FloatingBear
+            variant="fox"
+            motion="float-delay"
+            className="h-40 w-40 justify-self-start sm:col-start-3 sm:row-start-1 sm:h-64 sm:w-64 lg:h-[22rem] lg:w-[22rem]"
+          />
+          <div className="col-span-2 max-w-md text-center sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:max-w-lg">
+            <h1 className="font-serif text-3xl leading-[1.15] text-ink-900 sm:text-5xl lg:text-[3.35rem]">
+              Una lista de regalos para recibir a tu bebé.
+            </h1>
+            <p className="mt-5 text-sm text-ink-700 sm:text-base">
+              Clara, compartible y sin vueltas. Para papás, padrinos y quien
+              organice el encuentro.
+            </p>
+            <Link
+              href="/login"
+              className="mt-8 inline-flex rounded-full bg-ink-900 px-8 py-3.5 text-sm font-medium text-cream-50 shadow-sm transition hover:bg-ink-800"
+            >
+              Crear mi lista
+            </Link>
+            <div className="mt-12 flex flex-col items-center gap-2">
+              <p className="text-xs tracking-wide text-ink-700/80">
+                Deslizá para ver cómo se usa
+              </p>
+              <span aria-hidden="true" className="scroll-nudge text-2xl text-sage-600">
+                ↓
+              </span>
+            </div>
+          </div>
         </div>
       </section>
 

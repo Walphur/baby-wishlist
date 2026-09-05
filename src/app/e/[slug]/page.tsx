@@ -62,12 +62,12 @@ export default async function EventPage({
         <FloatingBear
           variant="bear"
           motion="float"
-          className="absolute left-0 top-0 h-14 w-14"
+          className="absolute left-2 top-0 h-16 w-16 sm:h-20 sm:w-20"
         />
         <FloatingBear
           variant="fox"
           motion="float-delay"
-          className="absolute right-0 top-4 h-12 w-12"
+          className="absolute right-2 top-2 h-20 w-20 sm:h-24 sm:w-24"
         />
         <span className="text-xs font-medium uppercase tracking-widest text-sage-600">
           Baby Shower
