@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getAccessibleEvent } from "@/lib/event-access";
 import { addOwnerGift, deleteGift, resetDefaultGifts } from "../actions";
 
 export default async function RegalosPage() {
@@ -8,12 +9,7 @@ export default async function RegalosPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: event } = await supabase
-    .from("baby_events")
-    .select("id")
-    .eq("user_id", user!.id)
-    .maybeSingle();
-
+  const event = await getAccessibleEvent(user!);
   if (!event) redirect("/dashboard");
 
   const { data: gifts } = await supabase

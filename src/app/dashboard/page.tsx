@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
-import { createEvent } from "./actions";
+import { createEvent, selectDashboardEvent } from "./actions";
+import { getAccessibleEvent, listAccessibleEvents } from "@/lib/event-access";
 import CopyLinkButton from "@/components/CopyLinkButton";
 import Link from "next/link";
 
@@ -10,11 +11,8 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: event } = await supabase
-    .from("baby_events")
-    .select("id, slug, baby_name, event_date, location")
-    .eq("user_id", user!.id)
-    .maybeSingle();
+  const accessible = await listAccessibleEvents(user!);
+  const event = await getAccessibleEvent(user!);
 
   if (!event) {
     return (
@@ -84,11 +82,30 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      {accessible.length > 1 && (
+        <div className="flex flex-wrap gap-2">
+          {accessible.map((item) => (
+            <form key={item.id} action={selectDashboardEvent.bind(null, item.id)}>
+              <button
+                type="submit"
+                className={`rounded-full px-3 py-1 text-xs transition ${
+                  item.id === event.id
+                    ? "bg-ink-900 text-cream-50"
+                    : "border border-ink-900/15 text-ink-700 hover:bg-ink-900/5"
+                }`}
+              >
+                {item.baby_name || "Lista"} {item.role === "owner" ? "" : "· equipo"}
+              </button>
+            </form>
+          ))}
+        </div>
+      )}
       <div>
         <h1 className="font-serif text-2xl text-ink-900">
           {event.baby_name ? `La lista de ${event.baby_name}` : "Tu lista"}
         </h1>
         <p className="mt-1 text-sm text-ink-700">
+          {event.role === "organizer" ? "Estás organizando esta lista. " : ""}
           {event.event_date ? new Date(event.event_date + "T00:00:00").toLocaleDateString("es-AR", { day: "numeric", month: "long", year: "numeric" }) : "Sin fecha"}
           {event.location ? ` · ${event.location}` : ""}
         </p>

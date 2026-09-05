@@ -30,4 +30,12 @@ html {
     transform: none;
     transition: none;
   }
+
+  .animate-fox-float,
+  .animate-float,
+  .animate-float-slow,
+  .animate-float-delay,
+  .animate-bounce {
+    animation: none !important;
+  }
 }

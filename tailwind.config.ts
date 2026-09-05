@@ -56,11 +56,17 @@ const config: Config = {
           "0%, 100%": { transform: "translateY(0px) rotate(-3deg)" },
           "50%": { transform: "translateY(-16px) rotate(3deg)" },
         },
+        "fox-float": {
+          "0%, 100%": { transform: "translateY(0px) rotate(-2deg)" },
+          "40%": { transform: "translateY(-18px) rotate(3deg)" },
+          "70%": { transform: "translateY(-8px) rotate(-1deg)" },
+        },
       },
       animation: {
         float: "float 6s ease-in-out infinite",
         "float-slow": "float 8s ease-in-out infinite",
         "float-delay": "float 7s ease-in-out infinite 1.5s",
+        "fox-float": "fox-float 7s ease-in-out infinite",
       },
     },
   },

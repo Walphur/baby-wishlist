@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getAccessibleEvent } from "@/lib/event-access";
 import { deleteRsvp } from "../actions";
 
 export default async function InvitadosPage() {
@@ -8,12 +9,7 @@ export default async function InvitadosPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: event } = await supabase
-    .from("baby_events")
-    .select("id, event_date, guest_list_reveal_days")
-    .eq("user_id", user!.id)
-    .maybeSingle();
-
+  const event = await getAccessibleEvent(user!);
   if (!event) redirect("/dashboard");
 
   const { data: rsvps } = await supabase

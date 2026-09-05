@@ -1,12 +1,19 @@
 import Link from "next/link";
 import Image from "next/image";
 import LogoutButton from "@/components/LogoutButton";
+import { createClient } from "@/lib/supabase/server";
+import { isAdminEmail } from "@/lib/admin";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
     <div className="min-h-screen">
       <header className="border-b border-ink-900/10 bg-white/50">
@@ -34,6 +41,14 @@ export default function DashboardLayout({
             <Link href="/dashboard/invitados" className="text-ink-700 hover:text-ink-900">
               Invitados
             </Link>
+            <Link href="/dashboard/equipo" className="text-ink-700 hover:text-ink-900">
+              Equipo
+            </Link>
+            {isAdminEmail(user?.email) && (
+              <Link href="/admin" className="font-medium text-sage-700 hover:text-sage-800">
+                Admin
+              </Link>
+            )}
             <LogoutButton />
           </nav>
         </div>
