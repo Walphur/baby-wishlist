@@ -155,9 +155,6 @@ export default function LandingPage() {
 
       <footer className="relative z-10 border-t border-ink-900/10 px-6 py-8 text-center text-xs text-ink-700">
         <p>Baby Wishlist — hecho con cariño para futuras familias.</p>
-        <div className="mt-3">
-          <DonateButton variant="quiet" />
-        </div>
       </footer>
     </main>
   );
