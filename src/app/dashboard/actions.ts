@@ -76,6 +76,35 @@ export async function createEvent(formData: FormData) {
   redirect("/dashboard");
 }
 
+export async function deleteEvent(eventId: string, formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  await requireEventOwner(user, eventId);
+
+  const confirm = String(formData.get("confirm") ?? "")
+    .trim()
+    .toUpperCase();
+  if (confirm !== "ELIMINAR") return;
+
+  const { error } = await supabase
+    .from("baby_events")
+    .delete()
+    .eq("id", eventId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  (await cookies()).delete("bw_event");
+  revalidatePath("/dashboard");
+  redirect("/dashboard");
+}
+
 export async function updateEvent(eventId: string, formData: FormData) {
   const supabase = await createClient();
   const {

@@ -10,7 +10,6 @@ type DonateButtonProps = {
 export default function DonateButton({ variant = "footer" }: DonateButtonProps) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [hasOfficialQr, setHasOfficialQr] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -20,20 +19,6 @@ export default function DonateButton({ variant = "footer" }: DonateButtonProps) 
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch(MP_DONATION_QR_SRC, { method: "HEAD" })
-      .then((res) => {
-        if (!cancelled) setHasOfficialQr(res.ok);
-      })
-      .catch(() => {
-        if (!cancelled) setHasOfficialQr(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   if (!MP_DONATION_ALIAS) return null;
 
@@ -95,21 +80,19 @@ export default function DonateButton({ variant = "footer" }: DonateButtonProps) 
               Gracias por sostenerla
             </h2>
             <p className="mt-2 text-sm text-ink-700">
-              En Mercado Pago tocá Transferir y pegá el alias. Así no te cobra
-              comisión.
+              Escaneá el QR de Mercado Pago. Si preferís no pagar comisión,
+              transferí al alias.
             </p>
-            <p className="mt-5 font-serif text-2xl tracking-wide text-ink-900">
+            <img
+              src={MP_DONATION_QR_SRC}
+              alt="QR oficial de Mercado Pago para donar"
+              width={280}
+              height={280}
+              className="mx-auto mt-5 h-52 w-52 rounded-xl2 border border-ink-900/10 bg-white p-3"
+            />
+            <p className="mt-4 font-serif text-2xl tracking-wide text-ink-900">
               {MP_DONATION_ALIAS}
             </p>
-            {hasOfficialQr && (
-              <img
-                src={MP_DONATION_QR_SRC}
-                alt="QR oficial de Mercado Pago para donar"
-                width={280}
-                height={280}
-                className="mx-auto mt-4 h-52 w-52 rounded-xl2 border border-ink-900/10 bg-white p-3"
-              />
-            )}
             <button
               type="button"
               onClick={copyAlias}

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getAccessibleEvent } from "@/lib/event-access";
-import { updateEvent } from "../actions";
+import { deleteEvent, updateEvent } from "../actions";
 
 export default async function PerfilPage() {
   const supabase = await createClient();
@@ -13,6 +13,7 @@ export default async function PerfilPage() {
   if (!event) redirect("/dashboard");
 
   const updateEventWithId = updateEvent.bind(null, event.id);
+  const deleteEventWithId = deleteEvent.bind(null, event.id);
 
   return (
     <div className="max-w-lg">
@@ -89,6 +90,30 @@ export default async function PerfilPage() {
           Guardar cambios
         </button>
       </form>
+
+      {event.role === "owner" && (
+        <form
+          action={deleteEventWithId}
+          className="mt-12 space-y-3 border-t border-ink-900/10 pt-8"
+        >
+          <h2 className="font-serif text-xl text-ink-900">Eliminar la lista</h2>
+          <p className="text-sm text-ink-700">
+            Solo el mail que la creó puede borrarla. Se van regalos, reservas e
+            invitados. No se puede deshacer.
+          </p>
+          <Field
+            label='Escribí ELIMINAR para confirmar'
+            name="confirm"
+            placeholder="ELIMINAR"
+          />
+          <button
+            type="submit"
+            className="rounded-xl2 border border-terracotta-500/40 px-6 py-3 text-sm font-medium text-terracotta-500 transition hover:bg-terracotta-400/10"
+          >
+            Eliminar esta lista
+          </button>
+        </form>
+      )}
     </div>
   );
 }
