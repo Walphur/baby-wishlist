@@ -5,6 +5,7 @@ import { getAccessibleEvent, listAccessibleEvents } from "@/lib/event-access";
 import CopyLinkButton from "@/components/CopyLinkButton";
 import InvitationCard from "@/components/InvitationCard";
 import InvitationSetup from "@/components/InvitationSetup";
+import SubmitButton from "@/components/SubmitButton";
 import { invitationTemplateId, isGeneratedInvitationUrl, formatInvitationTime } from "@/lib/invitation";
 import Link from "next/link";
 
@@ -42,12 +43,11 @@ export default async function DashboardPage() {
             textarea
             placeholder="Ej: ¡Gracias por acompañarnos en este momento tan especial!"
           />
-          <button
-            type="submit"
-            className="rounded-xl2 bg-ink-900 px-6 py-3 text-sm font-medium text-cream-50 transition hover:bg-ink-800"
-          >
-            Crear mi lista
-          </button>
+          <SubmitButton
+            idleLabel="Crear mi lista"
+            pendingLabel="Generando la imagen… esperá un momento"
+            className="rounded-xl2 bg-ink-900 px-6 py-3 text-sm font-medium text-cream-50 transition hover:bg-ink-800 disabled:opacity-60"
+          />
         </form>
       </div>
     );

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import InvitationCard from "@/components/InvitationCard";
+import GeneratingInvitationOverlay from "@/components/GeneratingInvitationOverlay";
 import {
   INVITATION_TEMPLATES,
   invitationTemplateId,
@@ -168,15 +169,29 @@ export default function InvitationSetup({
       {templateId && !usingCustom && (
         <div>
           <p className="mb-2 text-xs font-medium text-ink-700">
-            Vista previa rápida (al guardar se genera la versión final)
+            Vista previa rápida. Al guardar, la IA completa la tarjeta sin
+            cambiar el diseño original.
           </p>
-          <InvitationCard
-            templateId={templateId}
-            babyName={babyName}
-            eventDate={eventDate}
-            eventTime={eventTime}
-            location={location}
-          />
+          <div className="relative">
+            <InvitationCard
+              templateId={templateId}
+              babyName={babyName}
+              eventDate={eventDate}
+              eventTime={eventTime}
+              location={location}
+            />
+            <GeneratingInvitationOverlay />
+          </div>
+          <label className="mt-3 flex items-start gap-2 text-sm text-ink-800">
+            <input
+              type="checkbox"
+              name="regenerate_invitation"
+              className="mt-0.5 h-4 w-4 rounded border-ink-900/30 text-sage-600 focus:ring-sage-500"
+            />
+            <span>
+              Regenerar la imagen con IA al guardar (si la anterior quedó mal)
+            </span>
+          </label>
         </div>
       )}
     </div>

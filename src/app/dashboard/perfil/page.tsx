@@ -98,7 +98,7 @@ export default async function PerfilPage({
 
         <SubmitButton
           idleLabel="Guardar cambios"
-          pendingLabel="Guardando… puede tardar si regenera la invitación"
+          pendingLabel="Generando la imagen… esperá un momento"
           className="rounded-xl2 bg-ink-900 px-6 py-3 text-sm font-medium text-cream-50 transition hover:bg-ink-800 disabled:opacity-60"
         />
       </form>

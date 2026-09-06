@@ -76,7 +76,10 @@ async function resolveInvitationFields(
     };
   }
 
+  const forceRegenerate = formData.get("regenerate_invitation") === "on";
+
   const sameInvitePayload =
+    !forceRegenerate &&
     previous &&
     previous.invitation_template_id === templateChoice &&
     (previous.baby_name ?? null) === fields.baby_name &&
