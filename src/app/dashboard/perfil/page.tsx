@@ -4,6 +4,8 @@ import { getAccessibleEvent } from "@/lib/event-access";
 import { deleteEvent, updateEvent } from "../actions";
 import InvitationSetup from "@/components/InvitationSetup";
 
+export const maxDuration = 60;
+
 export default async function PerfilPage() {
   const supabase = await createClient();
   const {
@@ -27,8 +29,10 @@ export default async function PerfilPage() {
           allowCustom
           defaultBabyName={event.baby_name ?? ""}
           defaultEventDate={event.event_date ?? ""}
+          defaultEventTime={event.event_time ?? ""}
           defaultLocation={event.location ?? ""}
           defaultInvitationUrl={event.invitation_image_url}
+          defaultTemplateId={event.invitation_template_id}
         />
         <Field
           label="Nombre de los papás / anfitriones"

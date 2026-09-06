@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
-import { toggleClaim, addClaim, removeClaim, addGuestGift } from "@/app/e/[slug]/actions";
+import { toggleClaim, addClaim, addGuestGift } from "@/app/e/[slug]/actions";
 import type { GiftWithClaim } from "@/lib/types";
 
 export default function PublicGiftList({
@@ -49,13 +49,6 @@ export default function PublicGiftList({
     });
   }
 
-  function handleRemove(giftId: string) {
-    startTransition(async () => {
-      const result = await removeClaim(slug, giftId);
-      showToast(result);
-    });
-  }
-
   return (
     <div className="relative space-y-6">
       {toast && (
@@ -91,15 +84,6 @@ export default function PublicGiftList({
                     <div className="flex shrink-0 items-center gap-2">
                       <button
                         type="button"
-                        disabled={isPending || gift.claimedCount === 0}
-                        onClick={() => handleRemove(gift.id)}
-                        aria-label="Quitar mi aporte"
-                        className="flex h-9 w-9 items-center justify-center rounded-full border border-ink-900/15 text-lg text-ink-700 disabled:opacity-30"
-                      >
-                        −
-                      </button>
-                      <button
-                        type="button"
                         disabled={isPending || gift.claimedCount >= gift.max_quantity}
                         onClick={() => handleAdd(gift.id)}
                         aria-label="Sumarme a llevar esto"
@@ -114,9 +98,11 @@ export default function PublicGiftList({
                     <input
                       type="checkbox"
                       checked={gift.claimed}
-                      disabled={isPending}
-                      onChange={() => handleToggle(gift.id)}
-                      className="mt-0.5 h-5 w-5 shrink-0 rounded border-ink-900/30 text-sage-600 focus:ring-sage-500"
+                      disabled={isPending || gift.claimed}
+                      onChange={() => {
+                        if (!gift.claimed) handleToggle(gift.id);
+                      }}
+                      className="mt-0.5 h-5 w-5 shrink-0 rounded border-ink-900/30 text-sage-600 focus:ring-sage-500 disabled:opacity-70"
                     />
                     <div>
                       <p

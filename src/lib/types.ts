@@ -4,6 +4,7 @@ export type EventRow = {
   slug: string;
   baby_name: string | null;
   event_date: string | null;
+  event_time: string | null;
   location: string | null;
   host_names: string | null;
   photo_url: string | null;
@@ -12,6 +13,7 @@ export type EventRow = {
   location_map_url: string | null;
   drive_url: string | null;
   invitation_image_url: string | null;
+  invitation_template_id: string | null;
   guest_list_reveal_days: number;
   created_at: string;
   updated_at: string;

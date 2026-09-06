@@ -13,7 +13,6 @@ export async function toggleClaim(slug: string, giftId: string): Promise<ClaimRe
   if (!giftId) return { ok: false, message: "Regalo inválido." };
   const supabase = createAdminClient();
 
-  // Defensa en profundidad: el regalo tiene que pertenecer al evento del slug.
   const { data: gift } = await supabase
     .from("baby_gifts")
     .select("id, name, max_quantity, baby_events!inner(slug)")
@@ -29,17 +28,16 @@ export async function toggleClaim(slug: string, giftId: string): Promise<ClaimRe
     .eq("gift_id", giftId)
     .maybeSingle();
 
-  let message: string;
   if (existingClaim) {
-    await supabase.from("baby_claims").delete().eq("id", existingClaim.id);
-    message = `Listo, ya no vas a llevar "${gift.name}".`;
-  } else {
-    await supabase.from("baby_claims").insert({ gift_id: giftId });
-    message = `¡Genial! Anotamos que vas a llevar: ${gift.name}`;
+    return {
+      ok: false,
+      message: "Este regalo ya está reservado. Solo quien organiza la lista puede liberarlo.",
+    };
   }
 
+  await supabase.from("baby_claims").insert({ gift_id: giftId });
   revalidatePath(`/e/${slug}`);
-  return { ok: true, message };
+  return { ok: true, message: `¡Genial! Anotamos que vas a llevar: ${gift.name}` };
 }
 
 // Regalos con max_quantity (pañales, ropa, etc.): varias personas pueden sumarse.
@@ -70,33 +68,11 @@ export async function addClaim(slug: string, giftId: string): Promise<ClaimResul
   return { ok: true, message: `¡Genial! Sumaste que vas a llevar: ${gift.name}` };
 }
 
-export async function removeClaim(slug: string, giftId: string): Promise<ClaimResult> {
-  if (!giftId) return { ok: false, message: "Regalo inválido." };
-  const supabase = createAdminClient();
-
-  const { data: gift } = await supabase
-    .from("baby_gifts")
-    .select("id, name, baby_events!inner(slug)")
-    .eq("id", giftId)
-    .eq("baby_events.slug", slug)
-    .maybeSingle();
-
-  if (!gift) return { ok: false, message: "No encontramos ese regalo." };
-
-  const { data: existingClaim } = await supabase
-    .from("baby_claims")
-    .select("id")
-    .eq("gift_id", giftId)
-    .limit(1)
-    .maybeSingle();
-
-  if (!existingClaim) {
-    return { ok: false, message: "No hay reservas para quitar en este regalo." };
-  }
-
-  await supabase.from("baby_claims").delete().eq("id", existingClaim.id);
-  revalidatePath(`/e/${slug}`);
-  return { ok: true, message: `Listo, sacamos un aporte de "${gift.name}".` };
+export async function removeClaim(_slug: string, _giftId: string): Promise<ClaimResult> {
+  return {
+    ok: false,
+    message: "Solo quien organiza la lista puede quitar una reserva.",
+  };
 }
 
 export async function addGuestGift(slug: string, formData: FormData) {

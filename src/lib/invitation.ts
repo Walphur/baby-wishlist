@@ -166,7 +166,11 @@ export function getInvitationTemplate(id: string | null | undefined) {
   return INVITATION_TEMPLATES.find((template) => template.id === id) ?? null;
 }
 
-export function invitationTemplateId(url: string | null | undefined) {
+export function invitationTemplateId(
+  url: string | null | undefined,
+  templateId?: string | null
+) {
+  if (templateId && getInvitationTemplate(templateId)) return templateId;
   if (!url?.startsWith(INVITATION_TEMPLATE_PREFIX)) return null;
   const id = url.slice(INVITATION_TEMPLATE_PREFIX.length);
   return getInvitationTemplate(id) ? id : null;
@@ -174,6 +178,10 @@ export function invitationTemplateId(url: string | null | undefined) {
 
 export function isCustomInvitationUrl(url: string | null | undefined) {
   return Boolean(url && !url.startsWith(INVITATION_TEMPLATE_PREFIX) && /^https?:\/\//i.test(url));
+}
+
+export function isGeneratedInvitationUrl(url: string | null | undefined) {
+  return Boolean(url && /^https?:\/\//i.test(url) && !url.startsWith(INVITATION_TEMPLATE_PREFIX));
 }
 
 /** Fecha corta para que entre en las tarjetas (día + fecha, sin año). */
@@ -185,4 +193,14 @@ export function formatInvitationDate(isoDate: string | null | undefined) {
     month: "long",
   });
   return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+}
+
+/** Hora HH:MM (24h o del input type=time) → "16:30 hs". */
+export function formatInvitationTime(time: string | null | undefined) {
+  if (!time) return "";
+  const match = String(time).match(/^(\d{1,2}):(\d{2})/);
+  if (!match) return "";
+  const hours = match[1].padStart(2, "0");
+  const minutes = match[2];
+  return `${hours}:${minutes} hs`;
 }

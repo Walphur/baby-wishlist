@@ -15,6 +15,7 @@ create table if not exists public.baby_events (
   slug text not null unique,
   baby_name text,
   event_date date,
+  event_time time,
   location text,
   host_names text,
   photo_url text,
@@ -23,6 +24,7 @@ create table if not exists public.baby_events (
   location_map_url text,
   drive_url text,
   invitation_image_url text,
+  invitation_template_id text,
   guest_list_reveal_days integer not null default 14,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -35,6 +37,8 @@ alter table public.baby_events add column if not exists ask_party_size boolean n
 alter table public.baby_events add column if not exists location_map_url text;
 alter table public.baby_events add column if not exists drive_url text;
 alter table public.baby_events add column if not exists invitation_image_url text;
+alter table public.baby_events add column if not exists invitation_template_id text;
+alter table public.baby_events add column if not exists event_time time;
 alter table public.baby_events add column if not exists guest_list_reveal_days integer not null default 14;
 
 -- ============ BABY_GIFTS ============

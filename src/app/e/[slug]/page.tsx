@@ -6,7 +6,11 @@ import RsvpForm from "@/components/RsvpForm";
 import DecorativeBlobs from "@/components/DecorativeBlobs";
 import FloatingBear from "@/components/FloatingBear";
 import InvitationCard from "@/components/InvitationCard";
-import { invitationTemplateId, isCustomInvitationUrl } from "@/lib/invitation";
+import {
+  formatInvitationTime,
+  invitationTemplateId,
+  isGeneratedInvitationUrl,
+} from "@/lib/invitation";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +24,7 @@ export default async function EventPage({
   const { data: event } = await supabase
     .from("baby_events")
     .select(
-      "id, baby_name, event_date, location, host_names, message, ask_party_size, location_map_url, drive_url, invitation_image_url"
+      "id, baby_name, event_date, event_time, location, host_names, message, ask_party_size, location_map_url, drive_url, invitation_image_url, invitation_template_id"
     )
     .eq("slug", params.slug)
     .maybeSingle();
@@ -49,7 +53,11 @@ export default async function EventPage({
     claimedCount: claimCounts.get(g.id) ?? 0,
   }));
 
-  const templateId = invitationTemplateId(event.invitation_image_url);
+  const templateId = invitationTemplateId(
+    event.invitation_image_url,
+    event.invitation_template_id
+  );
+  const generatedInvitation = isGeneratedInvitationUrl(event.invitation_image_url);
 
   const formattedDate = event.event_date
     ? new Date(event.event_date + "T00:00:00").toLocaleDateString("es-AR", {
@@ -58,6 +66,7 @@ export default async function EventPage({
         year: "numeric",
       })
     : null;
+  const formattedTime = formatInvitationTime(event.event_time);
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-14">
@@ -82,7 +91,7 @@ export default async function EventPage({
             : "¡Estamos por ser familia!"}
         </h1>
         <p className="mt-3 text-sm text-ink-700">
-          {[formattedDate, event.location].filter(Boolean).join(" · ")}
+          {[formattedDate, formattedTime, event.location].filter(Boolean).join(" · ")}
         </p>
         {event.host_names && (
           <p className="mt-1 text-sm text-ink-700">
@@ -121,16 +130,24 @@ export default async function EventPage({
       </div>
 
       <div className="mt-10 space-y-8">
-        {templateId && (
+        {generatedInvitation && event.invitation_image_url && (
+          <img
+            src={event.invitation_image_url}
+            alt="Invitación"
+            className="mx-auto w-full max-w-2xl rounded-xl2 border border-ink-900/10 object-cover shadow-sm"
+          />
+        )}
+        {!generatedInvitation && templateId && (
           <InvitationCard
             templateId={templateId}
             babyName={event.baby_name}
             eventDate={event.event_date}
+            eventTime={event.event_time}
             location={event.location}
             className="mx-auto max-w-2xl border border-ink-900/10"
           />
         )}
-        {!templateId && isCustomInvitationUrl(event.invitation_image_url) && (
+        {!generatedInvitation && !templateId && event.invitation_image_url && (
           <img
             src={event.invitation_image_url}
             alt="Invitación"

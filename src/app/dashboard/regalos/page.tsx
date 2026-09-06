@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getAccessibleEvent } from "@/lib/event-access";
-import { addOwnerGift, deleteGift, resetDefaultGifts } from "../actions";
+import { addOwnerGift, clearGiftClaims, deleteGift, resetDefaultGifts } from "../actions";
 
 export default async function RegalosPage() {
   const supabase = await createClient();
@@ -45,7 +45,7 @@ export default async function RegalosPage() {
           <h1 className="font-serif text-2xl text-ink-900">Lista de regalos</h1>
           <p className="mt-1 text-sm text-ink-700">
             Los que aparecen tildados ya fueron reservados por algún
-            invitado (de forma anónima, no vemos quién).
+            invitado (de forma anónima). Solo vos podés liberarlos.
           </p>
         </div>
         <form action={reset}>
@@ -89,14 +89,26 @@ export default async function RegalosPage() {
                         </span>
                       )}
                     </span>
-                    <form action={deleteGift.bind(null, gift.id)}>
-                      <button
-                        type="submit"
-                        className="text-xs text-ink-700/60 hover:text-red-600"
-                      >
-                        Quitar
-                      </button>
-                    </form>
+                    <div className="flex shrink-0 items-center gap-2">
+                      {count > 0 && (
+                        <form action={clearGiftClaims.bind(null, gift.id)}>
+                          <button
+                            type="submit"
+                            className="text-xs text-sage-700 hover:text-sage-800"
+                          >
+                            Liberar
+                          </button>
+                        </form>
+                      )}
+                      <form action={deleteGift.bind(null, gift.id)}>
+                        <button
+                          type="submit"
+                          className="text-xs text-ink-700/60 hover:text-red-600"
+                        >
+                          Quitar
+                        </button>
+                      </form>
+                    </div>
                   </li>
                 );
               })}

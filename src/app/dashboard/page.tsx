@@ -5,8 +5,10 @@ import { getAccessibleEvent, listAccessibleEvents } from "@/lib/event-access";
 import CopyLinkButton from "@/components/CopyLinkButton";
 import InvitationCard from "@/components/InvitationCard";
 import InvitationSetup from "@/components/InvitationSetup";
-import { invitationTemplateId } from "@/lib/invitation";
+import { invitationTemplateId, isGeneratedInvitationUrl, formatInvitationTime } from "@/lib/invitation";
 import Link from "next/link";
+
+export const maxDuration = 60;
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -51,7 +53,11 @@ export default async function DashboardPage() {
     );
   }
 
-  const selectedTemplate = invitationTemplateId(event.invitation_image_url);
+  const selectedTemplate = invitationTemplateId(
+    event.invitation_image_url,
+    event.invitation_template_id
+  );
+  const generatedInvitation = isGeneratedInvitationUrl(event.invitation_image_url);
 
   const host = (await headers()).get("host");
   const protocol = host?.includes("localhost") ? "http" : "https";
@@ -119,15 +125,24 @@ export default async function DashboardPage() {
         <p className="mt-1 text-sm text-ink-700">
           {event.role === "organizer" ? "Estás organizando esta lista. " : ""}
           {event.event_date ? new Date(event.event_date + "T00:00:00").toLocaleDateString("es-AR", { day: "numeric", month: "long", year: "numeric" }) : "Sin fecha"}
+          {event.event_time ? ` · ${formatInvitationTime(event.event_time)}` : ""}
           {event.location ? ` · ${event.location}` : ""}
         </p>
       </div>
 
-      {selectedTemplate && (
+      {generatedInvitation && event.invitation_image_url && (
+        <img
+          src={event.invitation_image_url}
+          alt="Invitación"
+          className="w-full rounded-xl2 border border-ink-900/10 object-cover shadow-sm"
+        />
+      )}
+      {!generatedInvitation && selectedTemplate && (
         <InvitationCard
           templateId={selectedTemplate}
           babyName={event.baby_name}
           eventDate={event.event_date}
+          eventTime={event.event_time}
           location={event.location}
           className="border border-ink-900/10"
         />

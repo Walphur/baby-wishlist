@@ -12,20 +12,33 @@ type InvitationSetupProps = {
   allowCustom?: boolean;
   defaultBabyName?: string;
   defaultEventDate?: string;
+  defaultEventTime?: string;
   defaultLocation?: string;
   defaultInvitationUrl?: string | null;
+  defaultTemplateId?: string | null;
 };
+
+function normalizeTime(value: string) {
+  const match = value.match(/^(\d{1,2}):(\d{2})/);
+  if (!match) return "";
+  return `${match[1].padStart(2, "0")}:${match[2]}`;
+}
 
 export default function InvitationSetup({
   allowCustom = false,
   defaultBabyName = "",
   defaultEventDate = "",
+  defaultEventTime = "",
   defaultLocation = "",
   defaultInvitationUrl = null,
+  defaultTemplateId = null,
 }: InvitationSetupProps) {
-  const initialTemplate = invitationTemplateId(defaultInvitationUrl) ?? "";
+  const initialTemplate =
+    invitationTemplateId(defaultInvitationUrl, defaultTemplateId) ??
+    (allowCustom && isCustomInvitationUrl(defaultInvitationUrl) ? "custom" : "");
   const [babyName, setBabyName] = useState(defaultBabyName);
   const [eventDate, setEventDate] = useState(defaultEventDate);
+  const [eventTime, setEventTime] = useState(normalizeTime(defaultEventTime));
   const [location, setLocation] = useState(defaultLocation);
   const [templateId, setTemplateId] = useState(initialTemplate);
   const [customUrl, setCustomUrl] = useState(
@@ -45,16 +58,28 @@ export default function InvitationSetup({
           className="mt-1 w-full rounded-lg border border-ink-900/15 bg-white px-3 py-2 text-sm text-ink-900 outline-none focus:border-sage-500"
         />
       </label>
-      <label className="block">
-        <span className="text-sm font-medium text-ink-800">Fecha del evento</span>
-        <input
-          type="date"
-          name="event_date"
-          value={eventDate}
-          onChange={(event) => setEventDate(event.target.value)}
-          className="mt-1 w-full rounded-lg border border-ink-900/15 bg-white px-3 py-2 text-sm text-ink-900 outline-none focus:border-sage-500"
-        />
-      </label>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label className="block">
+          <span className="text-sm font-medium text-ink-800">Fecha del evento</span>
+          <input
+            type="date"
+            name="event_date"
+            value={eventDate}
+            onChange={(event) => setEventDate(event.target.value)}
+            className="mt-1 w-full rounded-lg border border-ink-900/15 bg-white px-3 py-2 text-sm text-ink-900 outline-none focus:border-sage-500"
+          />
+        </label>
+        <label className="block">
+          <span className="text-sm font-medium text-ink-800">Hora</span>
+          <input
+            type="time"
+            name="event_time"
+            value={eventTime}
+            onChange={(event) => setEventTime(event.target.value)}
+            className="mt-1 w-full rounded-lg border border-ink-900/15 bg-white px-3 py-2 text-sm text-ink-900 outline-none focus:border-sage-500"
+          />
+        </label>
+      </div>
       <label className="block">
         <span className="text-sm font-medium text-ink-800">Lugar</span>
         <input
@@ -70,7 +95,7 @@ export default function InvitationSetup({
       <fieldset>
         <legend className="text-sm font-medium text-ink-800">Tarjeta de invitación</legend>
         <p className="mt-1 text-xs text-ink-700">
-          Elegí una. Se completa sola con el nombre, el día y el lugar.
+          Elegí una. Al guardar, se completa sola con el nombre, el día, la hora y el lugar.
         </p>
         <input type="hidden" name="invitation_template" value={templateId} />
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -142,11 +167,14 @@ export default function InvitationSetup({
 
       {templateId && !usingCustom && (
         <div>
-          <p className="mb-2 text-xs font-medium text-ink-700">Así la van a ver</p>
+          <p className="mb-2 text-xs font-medium text-ink-700">
+            Vista previa rápida (al guardar se genera la versión final)
+          </p>
           <InvitationCard
             templateId={templateId}
             babyName={babyName}
             eventDate={eventDate}
+            eventTime={eventTime}
             location={location}
           />
         </div>

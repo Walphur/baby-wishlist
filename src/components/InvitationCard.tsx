@@ -1,5 +1,6 @@
 import {
   formatInvitationDate,
+  formatInvitationTime,
   getInvitationTemplate,
   type OverlayAlign,
   type OverlayFont,
@@ -22,21 +23,27 @@ export default function InvitationCard({
   templateId,
   babyName,
   eventDate,
+  eventTime,
   location,
   className = "",
 }: {
   templateId: string;
   babyName?: string | null;
   eventDate?: string | null;
+  eventTime?: string | null;
   location?: string | null;
   className?: string;
 }) {
   const template = getInvitationTemplate(templateId);
   if (!template) return null;
 
+  const dateText = [formatInvitationDate(eventDate), formatInvitationTime(eventTime)]
+    .filter(Boolean)
+    .join(" · ");
+
   const values = {
     name: babyName?.trim() ?? "",
-    date: formatInvitationDate(eventDate),
+    date: dateText,
     location: location?.trim() ?? "",
   };
 
