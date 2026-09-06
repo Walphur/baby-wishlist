@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { MP_DONATION_ALIAS, MP_DONATION_QR_SRC } from "@/lib/donation";
 
 type DonateButtonProps = {
@@ -10,14 +11,24 @@ type DonateButtonProps = {
 export default function DonateButton({ variant = "footer" }: DonateButtonProps) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
     };
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previous;
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open]);
 
   if (!MP_DONATION_ALIAS) return null;
@@ -32,6 +43,64 @@ export default function DonateButton({ variant = "footer" }: DonateButtonProps) 
     }
   }
 
+  const donateClass =
+    variant === "quiet"
+      ? "rounded-full bg-sage-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sage-700"
+      : "rounded-full bg-sage-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-sage-700";
+
+  const modal =
+    mounted &&
+    open &&
+    createPortal(
+      <div
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-ink-900/50 p-4"
+        onClick={() => setOpen(false)}
+        role="presentation"
+      >
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="donate-title"
+          className="relative w-full max-w-sm rounded-xl2 bg-cream-50 p-6 pt-12 text-center shadow-xl"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            aria-label="Cerrar"
+            className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full text-2xl leading-none text-ink-700 transition hover:bg-ink-900/5"
+          >
+            ×
+          </button>
+          <h2 id="donate-title" className="font-serif text-2xl text-ink-900">
+            Gracias
+          </h2>
+          <p className="mt-2 text-sm text-ink-700">
+            Esta web se hace con cariño. Si te sirvió, cualquier donación para
+            mantenerla se agradece.
+          </p>
+          <img
+            src={MP_DONATION_QR_SRC}
+            alt="QR oficial de Mercado Pago para donar"
+            width={280}
+            height={280}
+            className="mx-auto mt-5 h-52 w-52 rounded-xl2 border border-ink-900/10 bg-white p-3"
+          />
+          <p className="mt-4 font-serif text-2xl tracking-wide text-ink-900">
+            {MP_DONATION_ALIAS}
+          </p>
+          <button
+            type="button"
+            onClick={copyAlias}
+            className="mt-5 inline-flex rounded-full bg-sage-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-sage-700"
+          >
+            {copied ? "¡Alias copiado!" : "Copiar alias"}
+          </button>
+        </div>
+      </div>,
+      document.body
+    );
+
   return (
     <>
       {variant === "card" ? (
@@ -44,7 +113,7 @@ export default function DonateButton({ variant = "footer" }: DonateButtonProps) 
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="mt-5 rounded-full bg-ink-900 px-6 py-2.5 text-sm font-medium text-cream-50 transition hover:bg-ink-800"
+            className={`mt-5 ${donateClass}`}
           >
             Donar
           </button>
@@ -53,63 +122,12 @@ export default function DonateButton({ variant = "footer" }: DonateButtonProps) 
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className={
-            variant === "quiet"
-              ? "text-sm text-ink-700 underline decoration-ink-900/20 underline-offset-4 transition hover:text-ink-900"
-              : "rounded-full border border-ink-900/15 bg-white/80 px-4 py-2 text-sm text-ink-800 transition hover:bg-white"
-          }
+          className={donateClass}
         >
           Donar
         </button>
       )}
-
-      {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/40 px-4"
-          onClick={() => setOpen(false)}
-          role="presentation"
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="donate-title"
-            className="w-full max-w-sm rounded-xl2 border border-ink-900/10 bg-cream-50 p-6 text-center shadow-lg"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <h2 id="donate-title" className="font-serif text-2xl text-ink-900">
-              Gracias
-            </h2>
-            <p className="mt-2 text-sm text-ink-700">
-              Esta web se hace con cariño. Si te sirvió, cualquier donación
-              para mantenerla se agradece.
-            </p>
-            <img
-              src={MP_DONATION_QR_SRC}
-              alt="QR oficial de Mercado Pago para donar"
-              width={280}
-              height={280}
-              className="mx-auto mt-5 h-52 w-52 rounded-xl2 border border-ink-900/10 bg-white p-3"
-            />
-            <p className="mt-4 font-serif text-2xl tracking-wide text-ink-900">
-              {MP_DONATION_ALIAS}
-            </p>
-            <button
-              type="button"
-              onClick={copyAlias}
-              className="mt-5 inline-flex rounded-full bg-ink-900 px-5 py-2.5 text-sm font-medium text-cream-50 transition hover:bg-ink-800"
-            >
-              {copied ? "¡Alias copiado!" : "Copiar alias"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="mt-3 block w-full text-sm text-ink-700 hover:text-ink-900"
-            >
-              Cerrar
-            </button>
-          </div>
-        </div>
-      )}
+      {modal}
     </>
   );
 }

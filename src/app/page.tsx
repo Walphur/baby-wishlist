@@ -149,9 +149,7 @@ export default function LandingPage() {
           </ul>
         </div>
         <div className="mt-6">
-          <RevealOnScroll>
-            <DonateButton variant="card" />
-          </RevealOnScroll>
+          <DonateButton variant="card" />
         </div>
       </section>
 
