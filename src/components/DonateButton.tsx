@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MP_DONATION_ALIAS } from "@/lib/donation";
+import { MP_DONATION_ALIAS, MP_DONATION_QR_SRC } from "@/lib/donation";
 
 type DonateButtonProps = {
   variant?: "card" | "footer" | "quiet";
@@ -10,6 +10,7 @@ type DonateButtonProps = {
 export default function DonateButton({ variant = "footer" }: DonateButtonProps) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [hasOfficialQr, setHasOfficialQr] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -19,6 +20,20 @@ export default function DonateButton({ variant = "footer" }: DonateButtonProps) 
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(MP_DONATION_QR_SRC, { method: "HEAD" })
+      .then((res) => {
+        if (!cancelled) setHasOfficialQr(res.ok);
+      })
+      .catch(() => {
+        if (!cancelled) setHasOfficialQr(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (!MP_DONATION_ALIAS) return null;
 
@@ -38,8 +53,8 @@ export default function DonateButton({ variant = "footer" }: DonateButtonProps) 
         <div className="rounded-xl2 border border-ink-900/10 bg-white/70 p-6 text-center">
           <p className="font-serif text-xl text-ink-900">La web es gratis</p>
           <p className="mx-auto mt-2 max-w-sm text-sm text-ink-700">
-            Si te sirvió, podés transferir al alias. Es una transferencia, no
-            un link de pago: no come comisión.
+            Si te sirvió, transferí al alias. Es envío de dinero, no un cobro:
+            no come el 6,29%.
           </p>
           <button
             type="button"
@@ -80,19 +95,21 @@ export default function DonateButton({ variant = "footer" }: DonateButtonProps) 
               Gracias por sostenerla
             </h2>
             <p className="mt-2 text-sm text-ink-700">
-              En Mercado Pago: Transferir → pegá el alias. No uses link de
-              pago, ese sí cobra el 6,29%.
+              En Mercado Pago tocá Transferir y pegá el alias. Así no te cobra
+              comisión.
             </p>
             <p className="mt-5 font-serif text-2xl tracking-wide text-ink-900">
               {MP_DONATION_ALIAS}
             </p>
-            <img
-              src="/api/donation-qr"
-              alt={`QR con el alias ${MP_DONATION_ALIAS}`}
-              width={280}
-              height={280}
-              className="mx-auto mt-4 h-44 w-44 rounded-xl2 border border-ink-900/10 bg-white p-3"
-            />
+            {hasOfficialQr && (
+              <img
+                src={MP_DONATION_QR_SRC}
+                alt="QR oficial de Mercado Pago para donar"
+                width={280}
+                height={280}
+                className="mx-auto mt-4 h-52 w-52 rounded-xl2 border border-ink-900/10 bg-white p-3"
+              />
+            )}
             <button
               type="button"
               onClick={copyAlias}
