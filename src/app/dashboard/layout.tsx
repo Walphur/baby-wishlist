@@ -3,6 +3,7 @@ import Image from "next/image";
 import LogoutButton from "@/components/LogoutButton";
 import DashboardNav from "@/components/DashboardNav";
 import DonateButton from "@/components/DonateButton";
+import NavigationProgress from "@/components/NavigationProgress";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
 
@@ -18,6 +19,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen">
+      <NavigationProgress />
       <header className="sticky top-0 z-20 border-b border-ink-900/10 bg-white/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-4xl flex-col gap-4 px-4 py-4 sm:px-6">
           <div className="flex items-center justify-between gap-3">

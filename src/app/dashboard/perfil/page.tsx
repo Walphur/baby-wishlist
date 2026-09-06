@@ -3,10 +3,15 @@ import { createClient } from "@/lib/supabase/server";
 import { getAccessibleEvent } from "@/lib/event-access";
 import { deleteEvent, updateEvent } from "../actions";
 import InvitationSetup from "@/components/InvitationSetup";
+import SubmitButton from "@/components/SubmitButton";
 
 export const maxDuration = 60;
 
-export default async function PerfilPage() {
+export default async function PerfilPage({
+  searchParams,
+}: {
+  searchParams?: { saved?: string };
+}) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -17,6 +22,7 @@ export default async function PerfilPage() {
 
   const updateEventWithId = updateEvent.bind(null, event.id);
   const deleteEventWithId = deleteEvent.bind(null, event.id);
+  const saved = searchParams?.saved === "1";
 
   return (
     <div className="max-w-2xl">
@@ -24,6 +30,16 @@ export default async function PerfilPage() {
       <p className="mt-1 text-sm text-ink-700">
         Esta información aparece en la página que ven tus invitados.
       </p>
+
+      {saved && (
+        <div
+          role="status"
+          className="mt-4 rounded-xl2 border border-sage-300 bg-sage-50 px-4 py-3 text-sm text-sage-800"
+        >
+          Cambios guardados.
+        </div>
+      )}
+
       <form action={updateEventWithId} className="mt-6 space-y-4">
         <InvitationSetup
           allowCustom
@@ -80,12 +96,11 @@ export default async function PerfilPage() {
           regalo reservó (los regalos son anónimos a propósito).
         </p>
 
-        <button
-          type="submit"
-          className="rounded-xl2 bg-ink-900 px-6 py-3 text-sm font-medium text-cream-50 transition hover:bg-ink-800"
-        >
-          Guardar cambios
-        </button>
+        <SubmitButton
+          idleLabel="Guardar cambios"
+          pendingLabel="Guardando… puede tardar si regenera la invitación"
+          className="rounded-xl2 bg-ink-900 px-6 py-3 text-sm font-medium text-cream-50 transition hover:bg-ink-800 disabled:opacity-60"
+        />
       </form>
 
       {event.role === "owner" && (
@@ -99,16 +114,15 @@ export default async function PerfilPage() {
             invitados. No se puede deshacer.
           </p>
           <Field
-            label='Escribí ELIMINAR para confirmar'
+            label="Escribí ELIMINAR para confirmar"
             name="confirm"
             placeholder="ELIMINAR"
           />
-          <button
-            type="submit"
-            className="rounded-xl2 border border-terracotta-500/40 px-6 py-3 text-sm font-medium text-terracotta-500 transition hover:bg-terracotta-400/10"
-          >
-            Eliminar esta lista
-          </button>
+          <SubmitButton
+            idleLabel="Eliminar esta lista"
+            pendingLabel="Eliminando…"
+            className="rounded-xl2 border border-terracotta-500/40 px-6 py-3 text-sm font-medium text-terracotta-500 transition hover:bg-terracotta-400/10 disabled:opacity-60"
+          />
         </form>
       )}
     </div>

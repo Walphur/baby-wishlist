@@ -42,12 +42,24 @@ function templateFromForm(formData: FormData) {
   return null;
 }
 
-async function resolveInvitationFields(formData: FormData, eventId: string, fields: {
-  baby_name: string | null;
-  event_date: string | null;
-  event_time: string | null;
-  location: string | null;
-}) {
+async function resolveInvitationFields(
+  formData: FormData,
+  eventId: string,
+  fields: {
+    baby_name: string | null;
+    event_date: string | null;
+    event_time: string | null;
+    location: string | null;
+  },
+  previous?: {
+    baby_name: string | null;
+    event_date: string | null;
+    event_time: string | null;
+    location: string | null;
+    invitation_template_id: string | null;
+    invitation_image_url: string | null;
+  } | null
+) {
   const templateChoice = templateFromForm(formData);
 
   if (templateChoice === "custom") {
@@ -61,6 +73,22 @@ async function resolveInvitationFields(formData: FormData, eventId: string, fiel
     return {
       invitation_template_id: null as string | null,
       invitation_image_url: null as string | null,
+    };
+  }
+
+  const sameInvitePayload =
+    previous &&
+    previous.invitation_template_id === templateChoice &&
+    (previous.baby_name ?? null) === fields.baby_name &&
+    (previous.event_date ?? null) === fields.event_date &&
+    normalizeTimeValue(previous.event_time) === normalizeTimeValue(fields.event_time) &&
+    (previous.location ?? null) === fields.location &&
+    Boolean(previous.invitation_image_url);
+
+  if (sameInvitePayload) {
+    return {
+      invitation_template_id: templateChoice,
+      invitation_image_url: previous.invitation_image_url,
     };
   }
 
@@ -78,6 +106,13 @@ async function resolveInvitationFields(formData: FormData, eventId: string, fiel
     invitation_image_url:
       generated ?? `${INVITATION_TEMPLATE_PREFIX}${templateChoice}`,
   };
+}
+
+function normalizeTimeValue(value: string | null | undefined) {
+  if (!value) return null;
+  const match = String(value).match(/^(\d{1,2}):(\d{2})/);
+  if (!match) return null;
+  return `${match[1].padStart(2, "0")}:${match[2]}:00`;
 }
 
 export async function createEvent(formData: FormData) {
@@ -205,12 +240,25 @@ export async function updateEvent(eventId: string, formData: FormData) {
 
   await requireEventAccess(user, eventId);
 
-  const invitation = await resolveInvitationFields(formData, eventId, {
-    baby_name,
-    event_date,
-    event_time,
-    location,
-  });
+  const { data: previous } = await supabase
+    .from("baby_events")
+    .select(
+      "baby_name, event_date, event_time, location, invitation_template_id, invitation_image_url, slug"
+    )
+    .eq("id", eventId)
+    .maybeSingle();
+
+  const invitation = await resolveInvitationFields(
+    formData,
+    eventId,
+    {
+      baby_name,
+      event_date,
+      event_time,
+      location,
+    },
+    previous
+  );
 
   await supabase
     .from("baby_events")
@@ -231,15 +279,10 @@ export async function updateEvent(eventId: string, formData: FormData) {
     })
     .eq("id", eventId);
 
-  const { data: updated } = await supabase
-    .from("baby_events")
-    .select("slug")
-    .eq("id", eventId)
-    .maybeSingle();
-
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/perfil");
-  if (updated?.slug) revalidatePath(`/e/${updated.slug}`);
+  if (previous?.slug) revalidatePath(`/e/${previous.slug}`);
+  redirect("/dashboard/perfil?saved=1");
 }
 
 export async function resetDefaultGifts(eventId: string) {
