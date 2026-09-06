@@ -5,6 +5,8 @@ import PublicGiftList from "@/components/PublicGiftList";
 import RsvpForm from "@/components/RsvpForm";
 import DecorativeBlobs from "@/components/DecorativeBlobs";
 import FloatingBear from "@/components/FloatingBear";
+import InvitationCard from "@/components/InvitationCard";
+import { invitationTemplateId, isCustomInvitationUrl } from "@/lib/invitation";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +48,8 @@ export default async function EventPage({
     claimed: (claimCounts.get(g.id) ?? 0) > 0,
     claimedCount: claimCounts.get(g.id) ?? 0,
   }));
+
+  const templateId = invitationTemplateId(event.invitation_image_url);
 
   const formattedDate = event.event_date
     ? new Date(event.event_date + "T00:00:00").toLocaleDateString("es-AR", {
@@ -117,11 +121,20 @@ export default async function EventPage({
       </div>
 
       <div className="mt-10 space-y-8">
-        {event.invitation_image_url && (
+        {templateId && (
+          <InvitationCard
+            templateId={templateId}
+            babyName={event.baby_name}
+            eventDate={event.event_date}
+            location={event.location}
+            className="mx-auto max-w-2xl border border-ink-900/10"
+          />
+        )}
+        {!templateId && isCustomInvitationUrl(event.invitation_image_url) && (
           <img
             src={event.invitation_image_url}
             alt="Invitación"
-            className="mx-auto w-full max-w-md rounded-xl2 border border-ink-900/10 object-cover shadow-sm"
+            className="mx-auto w-full max-w-2xl rounded-xl2 border border-ink-900/10 object-cover shadow-sm"
           />
         )}
         <RsvpForm slug={params.slug} askPartySize={event.ask_party_size} />

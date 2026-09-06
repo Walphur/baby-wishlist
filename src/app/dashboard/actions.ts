@@ -11,6 +11,10 @@ import {
   requireEventAccess,
   requireEventOwner,
 } from "@/lib/event-access";
+import {
+  INVITATION_TEMPLATE_PREFIX,
+  getInvitationTemplate,
+} from "@/lib/invitation";
 
 const MAX_TEXT = 200;
 const MAX_MESSAGE = 500;
@@ -19,6 +23,17 @@ function clean(value: FormDataEntryValue | null, maxLen: number) {
   const text = String(value ?? "").trim();
   if (!text) return null;
   return text.slice(0, maxLen);
+}
+
+function invitationFromForm(formData: FormData) {
+  const template = String(formData.get("invitation_template") ?? "").trim();
+  if (template === "custom") {
+    return clean(formData.get("invitation_image_url"), 500);
+  }
+  if (getInvitationTemplate(template)) {
+    return `${INVITATION_TEMPLATE_PREFIX}${template}`;
+  }
+  return null;
 }
 
 export async function createEvent(formData: FormData) {
@@ -33,6 +48,7 @@ export async function createEvent(formData: FormData) {
   const location = clean(formData.get("location"), MAX_TEXT);
   const host_names = clean(formData.get("host_names"), MAX_TEXT);
   const message = clean(formData.get("message"), MAX_MESSAGE);
+  const invitation_image_url = invitationFromForm(formData);
 
   let slug = generateSlug();
   for (let i = 0; i < 5; i++) {
@@ -55,6 +71,7 @@ export async function createEvent(formData: FormData) {
       location,
       host_names,
       message,
+      invitation_image_url,
     })
     .select("id")
     .single();
@@ -119,7 +136,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
   const message = clean(formData.get("message"), MAX_MESSAGE);
   const location_map_url = clean(formData.get("location_map_url"), 500);
   const drive_url = clean(formData.get("drive_url"), 500);
-  const invitation_image_url = clean(formData.get("invitation_image_url"), 500);
+  const invitation_image_url = invitationFromForm(formData);
   const ask_party_size = formData.get("ask_party_size") === "on";
   const guest_list_reveal_days = Math.min(
     Math.max(Number(formData.get("guest_list_reveal_days") ?? 14) || 14, 0),
@@ -145,8 +162,15 @@ export async function updateEvent(eventId: string, formData: FormData) {
     })
     .eq("id", eventId);
 
+  const { data: updated } = await supabase
+    .from("baby_events")
+    .select("slug")
+    .eq("id", eventId)
+    .maybeSingle();
+
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/perfil");
+  if (updated?.slug) revalidatePath(`/e/${updated.slug}`);
 }
 
 export async function resetDefaultGifts(eventId: string) {

@@ -47,6 +47,10 @@ const config: Config = {
       fontFamily: {
         serif: ["var(--font-heading)", "system-ui", "sans-serif"],
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        "invite-script": ["var(--font-invite-script)", "cursive"],
+        "invite-display": ["var(--font-invite-display)", "cursive"],
+        "invite-serif": ["var(--font-invite-serif)", "Georgia", "serif"],
+        "invite-sans": ["var(--font-invite-sans)", "system-ui", "sans-serif"],
       },
       borderRadius: {
         xl2: "1.25rem",

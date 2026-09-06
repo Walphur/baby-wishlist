@@ -1,5 +1,12 @@
 import type { Metadata } from "next";
-import { Fredoka, Inter } from "next/font/google";
+import {
+  Dancing_Script,
+  Fredoka,
+  Great_Vibes,
+  Inter,
+  Playfair_Display,
+  Quicksand,
+} from "next/font/google";
 import "./globals.css";
 
 const fredoka = Fredoka({
@@ -8,6 +15,26 @@ const fredoka = Fredoka({
   weight: ["500", "600", "700"],
 });
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const inviteScript = Great_Vibes({
+  subsets: ["latin"],
+  variable: "--font-invite-script",
+  weight: "400",
+});
+const inviteDisplay = Dancing_Script({
+  subsets: ["latin"],
+  variable: "--font-invite-display",
+  weight: ["500", "600", "700"],
+});
+const inviteSerif = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-invite-serif",
+  weight: ["500", "600", "700"],
+});
+const inviteSans = Quicksand({
+  subsets: ["latin"],
+  variable: "--font-invite-sans",
+  weight: ["500", "600", "700"],
+});
 
 export const metadata: Metadata = {
   title: "Baby Wishlist — Lista de regalos para baby shower",
@@ -23,7 +50,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body
-        className={`${fredoka.variable} ${inter.variable} font-sans bg-gradient-to-b from-cream-50 via-cream-100 to-sage-50 text-ink-900 antialiased`}
+        className={`${fredoka.variable} ${inter.variable} ${inviteScript.variable} ${inviteDisplay.variable} ${inviteSerif.variable} ${inviteSans.variable} font-sans bg-gradient-to-b from-cream-50 via-cream-100 to-sage-50 text-ink-900 antialiased`}
       >
         {children}
       </body>

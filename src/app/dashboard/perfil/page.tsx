@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getAccessibleEvent } from "@/lib/event-access";
 import { deleteEvent, updateEvent } from "../actions";
+import InvitationSetup from "@/components/InvitationSetup";
 
 export default async function PerfilPage() {
   const supabase = await createClient();
@@ -16,20 +17,19 @@ export default async function PerfilPage() {
   const deleteEventWithId = deleteEvent.bind(null, event.id);
 
   return (
-    <div className="max-w-lg">
+    <div className="max-w-2xl">
       <h1 className="font-serif text-2xl text-ink-900">Datos del evento</h1>
       <p className="mt-1 text-sm text-ink-700">
         Esta información aparece en la página que ven tus invitados.
       </p>
       <form action={updateEventWithId} className="mt-6 space-y-4">
-        <Field label="Nombre del bebé/a" name="baby_name" defaultValue={event.baby_name ?? ""} />
-        <Field
-          label="Fecha del evento"
-          name="event_date"
-          type="date"
-          defaultValue={event.event_date ?? ""}
+        <InvitationSetup
+          allowCustom
+          defaultBabyName={event.baby_name ?? ""}
+          defaultEventDate={event.event_date ?? ""}
+          defaultLocation={event.location ?? ""}
+          defaultInvitationUrl={event.invitation_image_url}
         />
-        <Field label="Lugar" name="location" defaultValue={event.location ?? ""} />
         <Field
           label="Nombre de los papás / anfitriones"
           name="host_names"
@@ -53,13 +53,6 @@ export default async function PerfilPage() {
           placeholder="https://drive.google.com/..."
           defaultValue={event.drive_url ?? ""}
         />
-        <Field
-          label="Link a una imagen de invitación (opcional)"
-          name="invitation_image_url"
-          placeholder="Subí tu invitación a Drive/Imgur y pegá el link público"
-          defaultValue={event.invitation_image_url ?? ""}
-        />
-
         <label className="flex items-center gap-2">
           <input
             type="checkbox"

@@ -3,6 +3,9 @@ import { createClient } from "@/lib/supabase/server";
 import { createEvent, selectDashboardEvent } from "./actions";
 import { getAccessibleEvent, listAccessibleEvents } from "@/lib/event-access";
 import CopyLinkButton from "@/components/CopyLinkButton";
+import InvitationCard from "@/components/InvitationCard";
+import InvitationSetup from "@/components/InvitationSetup";
+import { invitationTemplateId } from "@/lib/invitation";
 import Link from "next/link";
 
 export default async function DashboardPage() {
@@ -16,18 +19,16 @@ export default async function DashboardPage() {
 
   if (!event) {
     return (
-      <div className="max-w-lg">
+      <div className="max-w-2xl">
         <h1 className="font-serif text-2xl text-ink-900">
           ¡Bienvenido/a! Contanos sobre tu baby shower
         </h1>
         <p className="mt-2 text-sm text-ink-700">
-          Con esto armamos tu página y una lista base de regalos que después
-          vas a poder editar.
+          Con esto armamos tu página, la invitación y una lista base de regalos
+          que después vas a poder editar.
         </p>
         <form action={createEvent} className="mt-6 space-y-4">
-          <Field label="Nombre del bebé/a (opcional)" name="baby_name" />
-          <Field label="Fecha del evento" name="event_date" type="date" />
-          <Field label="Lugar" name="location" placeholder="Ej: Salón Los Aromos" />
+          <InvitationSetup />
           <Field
             label="Nombre de los papás / anfitriones"
             name="host_names"
@@ -49,6 +50,8 @@ export default async function DashboardPage() {
       </div>
     );
   }
+
+  const selectedTemplate = invitationTemplateId(event.invitation_image_url);
 
   const host = (await headers()).get("host");
   const protocol = host?.includes("localhost") ? "http" : "https";
@@ -119,6 +122,16 @@ export default async function DashboardPage() {
           {event.location ? ` · ${event.location}` : ""}
         </p>
       </div>
+
+      {selectedTemplate && (
+        <InvitationCard
+          templateId={selectedTemplate}
+          babyName={event.baby_name}
+          eventDate={event.event_date}
+          location={event.location}
+          className="border border-ink-900/10"
+        />
+      )}
 
       <div className="rounded-xl2 border border-ink-900/10 bg-white/60 p-6">
         <p className="text-sm font-medium text-ink-900">

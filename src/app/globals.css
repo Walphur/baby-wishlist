@@ -6,6 +6,10 @@ html {
   scroll-behavior: smooth;
 }
 
+.invitation-card {
+  container-type: inline-size;
+}
+
 .reveal-on-scroll {
   opacity: 0;
   transform: translateY(36px);
