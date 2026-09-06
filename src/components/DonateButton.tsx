@@ -36,17 +36,17 @@ export default function DonateButton({ variant = "footer" }: DonateButtonProps) 
     <>
       {variant === "card" ? (
         <div className="rounded-xl2 border border-ink-900/10 bg-white/70 p-6 text-center">
-          <p className="font-serif text-xl text-ink-900">La web es gratis</p>
+          <p className="font-serif text-xl text-ink-900">Hecha con cariño</p>
           <p className="mx-auto mt-2 max-w-sm text-sm text-ink-700">
-            Si te sirvió, transferí al alias. Es envío de dinero, no un cobro:
-            no come el 6,29%.
+            Baby Wishlist es gratis. Si te sirvió y querés donar algo para
+            mantenerla, se agradece un montón.
           </p>
           <button
             type="button"
             onClick={() => setOpen(true)}
             className="mt-5 rounded-full bg-ink-900 px-6 py-2.5 text-sm font-medium text-cream-50 transition hover:bg-ink-800"
           >
-            Donar por alias
+            Donar
           </button>
         </div>
       ) : (
@@ -77,11 +77,11 @@ export default function DonateButton({ variant = "footer" }: DonateButtonProps) 
             onClick={(event) => event.stopPropagation()}
           >
             <h2 id="donate-title" className="font-serif text-2xl text-ink-900">
-              Gracias por sostenerla
+              Gracias
             </h2>
             <p className="mt-2 text-sm text-ink-700">
-              Escaneá el QR de Mercado Pago. Si preferís no pagar comisión,
-              transferí al alias.
+              Esta web se hace con cariño. Si te sirvió, cualquier donación
+              para mantenerla se agradece.
             </p>
             <img
               src={MP_DONATION_QR_SRC}
