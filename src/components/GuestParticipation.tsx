@@ -129,6 +129,11 @@ export default function GuestParticipation({
   return (
     <div className="space-y-8">
       <div className="space-y-6">
+        <p className="rounded-xl2 border border-ink-900/10 bg-white/70 px-4 py-3 text-sm text-ink-800">
+          <span className="font-medium text-ink-900">Los regalos son anónimos. </span>
+          Quien organiza solo ve qué ítems están reservados, no quién lleva cada
+          uno.
+        </p>
         {Array.from(grouped.entries()).map(([category, items]) => (
           <div key={category}>
             <h2 className="text-xs font-semibold uppercase tracking-wide text-sage-700">
