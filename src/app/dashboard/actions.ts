@@ -298,6 +298,7 @@ export async function createEvent(formData: FormData) {
     event_id: event.id,
     name: g.name,
     category: g.category,
+    notes: g.notes ?? null,
     is_custom: false,
     max_quantity: g.maxQuantity ?? null,
   }));
@@ -438,6 +439,7 @@ export async function resetDefaultGifts(eventId: string) {
     event_id: eventId,
     name: g.name,
     category: g.category,
+    notes: g.notes ?? null,
     is_custom: false,
     max_quantity: g.maxQuantity ?? null,
   }));

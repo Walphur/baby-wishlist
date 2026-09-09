@@ -1,9 +1,12 @@
+import { CLOTHING_PICKER_TAG } from "@/lib/clothing";
+
 export type DefaultGift = {
   name: string;
   category: string;
   // Si tiene maxQuantity, varias personas pueden anotarse para traerlo
   // (hasta ese número). Si es undefined, es un regalo de "una sola persona".
   maxQuantity?: number;
+  notes?: string;
 };
 
 /**
@@ -59,19 +62,13 @@ export const DEFAULT_GIFTS: DefaultGift[] = [
   { name: "Arrullo / manta de muselina", category: "Dormir", maxQuantity: 4 },
   { name: "Móvil para cuna", category: "Dormir" },
 
-  // Ropa
-  { name: "Bodies algodón talle 0-3 meses", category: "Ropa", maxQuantity: 8 },
-  { name: "Bodies / ranitas talle 3-6 meses", category: "Ropa", maxQuantity: 8 },
-  { name: "Conjuntos talle 6-9 meses", category: "Ropa", maxQuantity: 6 },
-  { name: "Medias y escarpines de algodón", category: "Ropa", maxQuantity: 8 },
-  { name: "Body o mantita con nombre bordado", category: "Ropa" },
-  { name: "Bodies manga corta", category: "Ropa", maxQuantity: 6 },
-  { name: "Bodies manga larga", category: "Ropa", maxQuantity: 6 },
-  { name: "Pijamas", category: "Ropa", maxQuantity: 6 },
-  { name: "Enteritos", category: "Ropa", maxQuantity: 6 },
-  { name: "Campera / abrigo", category: "Ropa", maxQuantity: 3 },
-  { name: "Gorritos", category: "Ropa", maxQuantity: 6 },
-  { name: "Babuchas", category: "Ropa", maxQuantity: 6 },
+  // Ropa: el invitado elige talle y tipo (no se agota un pijama concreto).
+  {
+    name: "Ropa a elección",
+    category: "Ropa",
+    maxQuantity: 40,
+    notes: CLOTHING_PICKER_TAG,
+  },
 
   // Paseo y maternidad
   { name: "Bolso / pañalera maternal", category: "Paseo y maternidad" },
@@ -101,7 +98,7 @@ export const DEFAULT_GIFTS: DefaultGift[] = [
   { name: "Juguetes sensoriales", category: "Juguetes", maxQuantity: 4 },
   { name: "Pelota blanda", category: "Juguetes", maxQuantity: 3 },
 
-  // Seguridad (categoría dinámica: el sistema agrupa por el string category)
+  // Seguridad
   { name: "Termómetro digital", category: "Seguridad" },
   { name: "Aspirador nasal", category: "Seguridad" },
   { name: "Protector de enchufes", category: "Seguridad", maxQuantity: 4 },
@@ -109,6 +106,7 @@ export const DEFAULT_GIFTS: DefaultGift[] = [
   // Recuerdos
   { name: "Álbum de fotos / mi primer año", category: "Recuerdos" },
   { name: "Set de huellitas en cerámica", category: "Recuerdos" },
+  { name: "Body o mantita con nombre bordado", category: "Recuerdos" },
   { name: "Tarta de pañales", category: "Recuerdos" },
   { name: "Caja de cartas para el futuro", category: "Recuerdos" },
   { name: "Tarjeta de regalo (por si no sabés qué elegir)", category: "Recuerdos" },

@@ -1,23 +1,13 @@
-const AVOID_ITEMS = [
+const GIFT_TIPS = [
   {
-    title: "Ropa solo talle RN",
-    detail: "Se usa poquísimo. Mejor 0-3, 3-6 o 6-9 meses.",
+    title: "Sobre la ropa",
+    detail:
+      "Los talles a partir de 3-6 meses y 6-9 meses suelen usarse más. El RN se queda chico muy rápido.",
   },
   {
-    title: "Peluches grandes",
-    detail: "Ocupan lugar y no entran en la cuna el primer año.",
-  },
-  {
-    title: "Juguetes para bebés de +6 meses",
-    detail: "Todavía no los van a usar; después llegan muchos.",
-  },
-  {
-    title: "Productos con perfume fuerte",
-    detail: "La piel del recién nacido es sensible: preferí neutro / sin fragancia.",
-  },
-  {
-    title: "Zapatos",
-    detail: "Hasta que camine alcanzan medias y escarpines.",
+    title: "Si pensás en calzado",
+    detail:
+      "Hasta que camine, medias o escarpines suelen alcanzar mejor que zapatitos.",
   },
 ];
 
@@ -29,25 +19,26 @@ export default function DisclaimerBanner() {
           <span className="font-medium">Esta lista es solo una guía. </span>
           Nadie está obligado a traer algo de acá: es simplemente una ayuda
           para quien no sabe qué regalar y para evitar que se repitan
-          regalos. ¡Traé lo que quieras, con eso ya es más que suficiente!
+          regalos. Traé lo que prefieras: con tu presencia ya es más que
+          suficiente.
         </p>
       </div>
 
       <div className="rounded-xl2 border border-ink-900/10 bg-white/70 px-5 py-4">
         <h2 className="font-serif text-lg text-ink-900">
-          Preferimos que no traigan
+          Tips para armar tu regalo
         </h2>
         <p className="mt-1 text-xs text-ink-700">
-          Ideas típicas que suelen sobrar o no sirven al principio:
+          Sugerencias suaves, por si te sirven a la hora de elegir:
         </p>
         <ul className="mt-3 space-y-2.5">
-          {AVOID_ITEMS.map((item) => (
+          {GIFT_TIPS.map((item) => (
             <li key={item.title} className="flex gap-3 text-sm">
               <span
                 aria-hidden
-                className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ink-900/10 text-[11px] font-semibold text-ink-700"
+                className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-sage-100 text-[11px] font-semibold text-sage-700"
               >
-                ×
+                ·
               </span>
               <div>
                 <p className="font-medium text-ink-900">{item.title}</p>

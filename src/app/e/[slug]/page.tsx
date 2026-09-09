@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import DisclaimerBanner from "@/components/DisclaimerBanner";
-import PublicGiftList from "@/components/PublicGiftList";
-import RsvpForm from "@/components/RsvpForm";
+import GuestParticipation from "@/components/GuestParticipation";
 import DecorativeBlobs from "@/components/DecorativeBlobs";
 import FloatingBear from "@/components/FloatingBear";
 import InvitationCard from "@/components/InvitationCard";
@@ -187,9 +186,12 @@ export default async function EventPage({
             className="mx-auto w-full max-w-2xl rounded-xl2 border border-ink-900/10 object-cover shadow-sm"
           />
         )}
-        <RsvpForm slug={params.slug} askPartySize={event.ask_party_size} />
         <DisclaimerBanner />
-        <PublicGiftList slug={params.slug} gifts={giftsWithClaim} />
+        <GuestParticipation
+          slug={params.slug}
+          gifts={giftsWithClaim}
+          askPartySize={event.ask_party_size}
+        />
       </div>
     </main>
   );
