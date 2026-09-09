@@ -10,7 +10,7 @@ export const maxDuration = 60;
 export default async function PerfilPage({
   searchParams,
 }: {
-  searchParams?: { saved?: string };
+  searchParams?: { saved?: string; error?: string };
 }) {
   const supabase = await createClient();
   const {
@@ -23,12 +23,14 @@ export default async function PerfilPage({
   const updateEventWithId = updateEvent.bind(null, event.id);
   const deleteEventWithId = deleteEvent.bind(null, event.id);
   const saved = searchParams?.saved === "1";
+  const error = searchParams?.error;
 
   return (
     <div className="max-w-2xl">
       <h1 className="font-serif text-2xl text-ink-900">Datos del evento</h1>
       <p className="mt-1 text-sm text-ink-700">
-        Esta información aparece en la página que ven tus invitados.
+        Esta información aparece en la página que ven tus invitados. La lista se
+        borra sola 7 días después de la fecha del baby shower para no ocupar espacio.
       </p>
 
       {saved && (
@@ -39,11 +41,19 @@ export default async function PerfilPage({
           Cambios guardados.
         </div>
       )}
+      {error ? (
+        <p className="mt-4 rounded-xl2 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          {error}
+        </p>
+      ) : null}
 
-      <form action={updateEventWithId} className="mt-6 space-y-4">
+      <form
+        action={updateEventWithId}
+        encType="multipart/form-data"
+        className="mt-6 space-y-4"
+      >
         <InvitationSetup
           allowCustom
-          showAiRegenerate
           defaultBabyName={event.baby_name ?? ""}
           defaultEventDate={event.event_date ?? ""}
           defaultEventTime={event.event_time ?? ""}
@@ -99,7 +109,7 @@ export default async function PerfilPage({
 
         <SubmitButton
           idleLabel="Guardar cambios"
-          pendingLabel="Generando la imagen… esperá un momento"
+          pendingLabel="Guardando…"
           className="rounded-xl2 bg-ink-900 px-6 py-3 text-sm font-medium text-cream-50 transition hover:bg-ink-800 disabled:opacity-60"
         />
       </form>

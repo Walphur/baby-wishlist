@@ -13,10 +13,15 @@ import {
   requireEventOwner,
 } from "@/lib/event-access";
 import {
+  INVITATION_AI_ENABLED,
   INVITATION_TEMPLATE_PREFIX,
   getInvitationTemplate,
 } from "@/lib/invitation";
 import { generateAndStoreInvitation } from "@/lib/openai-invitation";
+import {
+  deleteEventInvitationFiles,
+  uploadUserInvitationImage,
+} from "@/lib/invitation-upload";
 import { isAdminEmail } from "@/lib/admin";
 
 const MAX_TEXT = 200;
@@ -63,20 +68,66 @@ async function resolveInvitationFields(
     /** En create: no llamar a OpenAI (evita 504). La plantilla alcanza; regenerar en Evento. */
     deferAi?: boolean;
   }
-) {
+): Promise<
+  | {
+      ok: true;
+      invitation_template_id: string | null;
+      invitation_image_url: string | null;
+    }
+  | { ok: false; error: string }
+> {
+  // Modo sin IA: solo archivo / link / sin tarjeta.
+  if (!INVITATION_AI_ENABLED) {
+    if (formData.get("invitation_clear") === "on") {
+      return {
+        ok: true,
+        invitation_template_id: null,
+        invitation_image_url: null,
+      };
+    }
+
+    const file = formData.get("invitation_image");
+    if (file instanceof File && file.size > 0) {
+      const uploaded = await uploadUserInvitationImage(eventId, file);
+      if (!uploaded.ok) return { ok: false, error: uploaded.error };
+      return {
+        ok: true,
+        invitation_template_id: null,
+        invitation_image_url: uploaded.url,
+      };
+    }
+
+    const customUrl = clean(formData.get("invitation_image_url"), 500);
+    if (customUrl) {
+      return {
+        ok: true,
+        invitation_template_id: null,
+        invitation_image_url: customUrl,
+      };
+    }
+
+    return {
+      ok: true,
+      invitation_template_id: null,
+      invitation_image_url: previous?.invitation_image_url ?? null,
+    };
+  }
+
   const templateChoice = templateFromForm(formData);
 
   if (templateChoice === "custom") {
     return {
-      invitation_template_id: null as string | null,
+      ok: true,
+      invitation_template_id: null,
       invitation_image_url: clean(formData.get("invitation_image_url"), 500),
     };
   }
 
   if (!templateChoice) {
     return {
-      invitation_template_id: null as string | null,
-      invitation_image_url: null as string | null,
+      ok: true,
+      invitation_template_id: null,
+      invitation_image_url: null,
     };
   }
 
@@ -85,6 +136,7 @@ async function resolveInvitationFields(
 
   if (options?.deferAi && !forceRegenerate) {
     return {
+      ok: true,
       invitation_template_id: templateChoice,
       invitation_image_url: templateUrl,
     };
@@ -102,6 +154,7 @@ async function resolveInvitationFields(
 
   if (sameInvitePayload) {
     return {
+      ok: true,
       invitation_template_id: templateChoice,
       invitation_image_url: previous.invitation_image_url,
     };
@@ -117,6 +170,7 @@ async function resolveInvitationFields(
   });
 
   return {
+    ok: true,
     invitation_template_id: templateChoice,
     invitation_image_url: generated ?? templateUrl,
   };
@@ -165,7 +219,7 @@ export async function createEvent(formData: FormData) {
     slug = generateSlug();
   }
 
-  const invitation = await resolveInvitationFields(
+  const invitationDraft = await resolveInvitationFields(
     formData,
     "pending",
     {
@@ -177,6 +231,14 @@ export async function createEvent(formData: FormData) {
     null,
     { deferAi: true }
   );
+
+  if (!invitationDraft.ok) {
+    redirect(`/dashboard?error=${encodeURIComponent(invitationDraft.error)}`);
+  }
+
+  // Si hay archivo, primero creamos el evento y después subimos (necesitamos el id).
+  const file = formData.get("invitation_image");
+  const hasFile = file instanceof File && file.size > 0;
 
   const { data: event, error } = await admin
     .from("baby_events")
@@ -193,8 +255,8 @@ export async function createEvent(formData: FormData) {
       drive_url,
       ask_party_size,
       guest_list_reveal_days,
-      invitation_image_url: invitation.invitation_image_url,
-      invitation_template_id: invitation.invitation_template_id,
+      invitation_image_url: hasFile ? null : invitationDraft.invitation_image_url,
+      invitation_template_id: invitationDraft.invitation_template_id,
     })
     .select("id")
     .single();
@@ -206,6 +268,27 @@ export async function createEvent(formData: FormData) {
         error?.message ?? "No se pudo crear el evento"
       )}`
     );
+  }
+
+  if (hasFile) {
+    const invitation = await resolveInvitationFields(
+      formData,
+      event.id,
+      { baby_name, event_date, event_time, location },
+      null,
+      { deferAi: true }
+    );
+    if (!invitation.ok) {
+      redirect(`/dashboard?error=${encodeURIComponent(invitation.error)}`);
+    }
+    await admin
+      .from("baby_events")
+      .update({
+        invitation_image_url: invitation.invitation_image_url,
+        invitation_template_id: invitation.invitation_template_id,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", event.id);
   }
 
   const seedGifts = DEFAULT_GIFTS.map((g) => ({
@@ -245,7 +328,10 @@ export async function deleteEvent(eventId: string, formData: FormData) {
     .toUpperCase();
   if (confirm !== "ELIMINAR") return;
 
-  const { error } = await supabase
+  await deleteEventInvitationFiles(eventId);
+
+  const admin = createAdminClient();
+  const { error } = await admin
     .from("baby_events")
     .delete()
     .eq("id", eventId)
@@ -303,7 +389,12 @@ export async function updateEvent(eventId: string, formData: FormData) {
     previous
   );
 
-  await supabase
+  if (!invitation.ok) {
+    redirect(`/dashboard/perfil?error=${encodeURIComponent(invitation.error)}`);
+  }
+
+  const admin = createAdminClient();
+  await admin
     .from("baby_events")
     .update({
       baby_name,

@@ -40,7 +40,7 @@ export default async function DashboardPage({
             No se pudo crear el evento: {params.error}
           </p>
         ) : null}
-        <form action={createEvent} className="mt-6 space-y-4">
+        <form action={createEvent} encType="multipart/form-data" className="mt-6 space-y-4">
           <InvitationSetup />
           <Field
             label="Nombre de los papás / anfitriones"

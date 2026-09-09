@@ -1,5 +1,14 @@
 export const INVITATION_TEMPLATE_PREFIX = "template:";
 
+/** Plantillas + IA desactivadas por costo. Solo subida de imagen propia. */
+export const INVITATION_AI_ENABLED = false;
+
+/** Límite de subida de tarjeta personalizada. */
+export const MAX_INVITATION_UPLOAD_MB = 5;
+export const MAX_INVITATION_UPLOAD_BYTES = MAX_INVITATION_UPLOAD_MB * 1024 * 1024;
+
+export const INVITATION_UPLOAD_ACCEPT = "image/jpeg,image/png,image/webp";
+
 export type OverlayAlign = "left" | "center" | "right";
 export type OverlayFont = "script" | "serif" | "sans" | "display";
 export type OverlayKey = "name" | "date" | "location";

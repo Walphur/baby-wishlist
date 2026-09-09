@@ -61,72 +61,96 @@ export default async function EventPage({
 
   const formattedDate = event.event_date
     ? new Date(event.event_date + "T00:00:00").toLocaleDateString("es-AR", {
+        weekday: "long",
         day: "numeric",
         month: "long",
         year: "numeric",
       })
+    : null;
+  const prettyDate = formattedDate
+    ? formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1)
     : null;
   const formattedTime = formatInvitationTime(event.event_time);
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-14">
       <DecorativeBlobs />
-      <div className="relative text-center">
+      <div className="relative isolate text-center">
         <FloatingBear
           variant="bear"
           motion="float"
-          className="absolute left-2 top-0 h-16 w-16 sm:h-20 sm:w-20"
+          className="absolute left-0 top-2 z-0 h-20 w-20 opacity-80 sm:left-2 sm:h-24 sm:w-24"
         />
         <FloatingBear
           variant="fox"
           motion="float-delay"
-          className="absolute right-2 top-2 h-20 w-20 sm:h-24 sm:w-24"
+          className="absolute right-0 top-4 z-0 h-24 w-24 opacity-80 sm:right-2 sm:h-28 sm:w-28"
         />
-        <span className="text-xs font-medium uppercase tracking-widest text-sage-600">
-          Baby Shower
-        </span>
-        <h1 className="mt-3 font-serif text-3xl text-ink-900 sm:text-4xl">
-          {event.baby_name
-            ? `¡Vamos a recibir a ${event.baby_name}!`
-            : "¡Estamos por ser familia!"}
-        </h1>
-        <p className="mt-3 text-sm text-ink-700">
-          {[formattedDate, formattedTime, event.location].filter(Boolean).join(" · ")}
-        </p>
-        {event.host_names && (
-          <p className="mt-1 text-sm text-ink-700">
-            Con mucho cariño, {event.host_names}
-          </p>
-        )}
-        {event.message && (
-          <p className="mx-auto mt-4 max-w-md text-sm italic text-ink-800">
-            “{event.message}”
-          </p>
-        )}
-        {(event.location_map_url || event.drive_url) && (
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-            {event.location_map_url && (
-              <a
-                href={event.location_map_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-lg border border-ink-900/15 bg-white/70 px-4 py-2 text-xs font-medium text-ink-800 transition hover:bg-white sm:text-sm"
-              >
-                📍 Ver ubicación en el mapa
-              </a>
-            )}
-            {event.drive_url && (
-              <a
-                href={event.drive_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-lg border border-ink-900/15 bg-white/70 px-4 py-2 text-xs font-medium text-ink-800 transition hover:bg-white sm:text-sm"
-              >
-                📷 Ver / subir fotos
-              </a>
-            )}
+
+        <div className="relative z-10">
+          <span className="text-xs font-medium uppercase tracking-[0.22em] text-sage-600">
+            Baby Shower
+          </span>
+          <h1 className="mt-3 font-serif text-3xl leading-tight text-ink-900 sm:text-4xl">
+            {event.baby_name
+              ? `¡Vamos a recibir a ${event.baby_name}!`
+              : "¡Estamos por ser familia!"}
+          </h1>
+
+          <div className="mx-auto mt-6 max-w-md rounded-[1.4rem] border border-sage-200/70 bg-gradient-to-b from-cream-50/95 via-white/80 to-sage-50/70 px-5 py-5 shadow-[0_12px_40px_-24px_rgba(70,90,60,0.45)] backdrop-blur-sm">
+            {prettyDate ? (
+              <p className="font-serif text-xl leading-snug text-ink-900 sm:text-2xl">
+                {prettyDate}
+              </p>
+            ) : null}
+            {formattedTime ? (
+              <p className="mt-2 text-sm font-semibold tracking-[0.14em] text-sage-700 uppercase">
+                {formattedTime}
+              </p>
+            ) : null}
+            {event.location ? (
+              <p className="mt-3 border-t border-sage-200/80 pt-3 font-serif text-base text-ink-800">
+                {event.location}
+              </p>
+            ) : null}
+            {event.host_names ? (
+              <p className="mt-3 text-sm text-ink-700">
+                Con mucho cariño,{" "}
+                <span className="font-medium text-ink-900">{event.host_names}</span>
+              </p>
+            ) : null}
+            {event.message ? (
+              <p className="mt-3 text-sm italic leading-relaxed text-ink-800">
+                “{event.message}”
+              </p>
+            ) : null}
           </div>
-        )}
+
+          {(event.location_map_url || event.drive_url) && (
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+              {event.location_map_url && (
+                <a
+                  href={event.location_map_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-lg border border-ink-900/15 bg-white/70 px-4 py-2 text-xs font-medium text-ink-800 transition hover:bg-white sm:text-sm"
+                >
+                  Ver ubicación en el mapa
+                </a>
+              )}
+              {event.drive_url && (
+                <a
+                  href={event.drive_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-lg border border-ink-900/15 bg-white/70 px-4 py-2 text-xs font-medium text-ink-800 transition hover:bg-white sm:text-sm"
+                >
+                  Ver / subir fotos
+                </a>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="mt-10 space-y-8">
