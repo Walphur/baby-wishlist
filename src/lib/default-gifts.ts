@@ -19,6 +19,12 @@ export const DEFAULT_GIFTS: DefaultGift[] = [
   { name: "Crema para paspaduras", category: "Higiene y cambio", maxQuantity: 6 },
   { name: "Cambiador portátil impermeable", category: "Higiene y cambio" },
   { name: "Kit para el cuidado del bebé", category: "Higiene y cambio" },
+  { name: "Organizador para pañales", category: "Higiene y cambio" },
+  { name: "Cesto para pañales", category: "Higiene y cambio" },
+  { name: "Toallones adicionales", category: "Higiene y cambio", maxQuantity: 4 },
+  { name: "Gasas / muselinas", category: "Higiene y cambio", maxQuantity: 6 },
+  { name: "Neceser para bebé", category: "Higiene y cambio" },
+  { name: "Cepillo y peine suave", category: "Higiene y cambio" },
 
   // Baño
   { name: "Bañera plástica liviana", category: "Baño" },
@@ -26,6 +32,9 @@ export const DEFAULT_GIFTS: DefaultGift[] = [
   { name: "Jabón neutro hipoalergénico", category: "Baño", maxQuantity: 4 },
   { name: "Shampoo sin lágrimas", category: "Baño", maxQuantity: 4 },
   { name: "Toallón de algodón con capucha", category: "Baño", maxQuantity: 4 },
+  { name: "Esponja suave para bebé", category: "Baño", maxQuantity: 4 },
+  { name: "Juguetes de baño", category: "Baño", maxQuantity: 4 },
+  { name: "Organizador para productos de baño", category: "Baño" },
 
   // Alimentación
   { name: "Mamadera anticólico", category: "Alimentación", maxQuantity: 4 },
@@ -33,13 +42,22 @@ export const DEFAULT_GIFTS: DefaultGift[] = [
   { name: "Esterilizador o kit para microondas", category: "Alimentación" },
   { name: "Cepillo para mamaderas", category: "Alimentación" },
   { name: "Baberos de tela", category: "Alimentación", maxQuantity: 8 },
+  { name: "Baberos impermeables", category: "Alimentación", maxQuantity: 6 },
   { name: "Chupete ortodóntico + portachupetes", category: "Alimentación", maxQuantity: 6 },
+  { name: "Plato / bol de silicona para bebé", category: "Alimentación", maxQuantity: 4 },
+  { name: "Cuchara de silicona", category: "Alimentación", maxQuantity: 4 },
+  { name: "Vaso antiderrame", category: "Alimentación", maxQuantity: 4 },
+  { name: "Set de alimentación de silicona", category: "Alimentación" },
 
   // Dormir
   { name: "Mantita de algodón liviana", category: "Dormir", maxQuantity: 4 },
   { name: "Saco de dormir talle 0-6 meses", category: "Dormir", maxQuantity: 3 },
   { name: "Lucecita de noche tenue", category: "Dormir" },
   { name: "Libro de cuentos para leer antes de dormir", category: "Dormir", maxQuantity: 4 },
+  { name: "Protector impermeable de colchón", category: "Dormir", maxQuantity: 3 },
+  { name: "Sábanas adicionales para cuna", category: "Dormir", maxQuantity: 4 },
+  { name: "Arrullo / manta de muselina", category: "Dormir", maxQuantity: 4 },
+  { name: "Móvil para cuna", category: "Dormir" },
 
   // Ropa
   { name: "Bodies algodón talle 0-3 meses", category: "Ropa", maxQuantity: 8 },
@@ -47,11 +65,22 @@ export const DEFAULT_GIFTS: DefaultGift[] = [
   { name: "Conjuntos talle 6-9 meses", category: "Ropa", maxQuantity: 6 },
   { name: "Medias y escarpines de algodón", category: "Ropa", maxQuantity: 8 },
   { name: "Body o mantita con nombre bordado", category: "Ropa" },
+  { name: "Bodies manga corta", category: "Ropa", maxQuantity: 6 },
+  { name: "Bodies manga larga", category: "Ropa", maxQuantity: 6 },
+  { name: "Pijamas", category: "Ropa", maxQuantity: 6 },
+  { name: "Enteritos", category: "Ropa", maxQuantity: 6 },
+  { name: "Campera / abrigo", category: "Ropa", maxQuantity: 3 },
+  { name: "Gorritos", category: "Ropa", maxQuantity: 6 },
+  { name: "Babuchas", category: "Ropa", maxQuantity: 6 },
 
   // Paseo y maternidad
   { name: "Bolso / pañalera maternal", category: "Paseo y maternidad" },
   { name: "Mochila portabebés ergonómica", category: "Paseo y maternidad" },
   { name: "Cambiador de viaje", category: "Paseo y maternidad" },
+  { name: "Manta para cochecito", category: "Paseo y maternidad" },
+  { name: "Sombrilla para cochecito", category: "Paseo y maternidad" },
+  { name: "Bolso organizador", category: "Paseo y maternidad" },
+  { name: "Protector de lluvia para cochecito", category: "Paseo y maternidad" },
 
   // Grandes
   { name: "Cochecito", category: "Grandes" },
@@ -60,10 +89,22 @@ export const DEFAULT_GIFTS: DefaultGift[] = [
   { name: "Hamaca (ej. Maxi-Cosi Kori)", category: "Grandes" },
   { name: "Gimnasio infantil", category: "Grandes" },
   { name: "Cámara de vigilancia para bebés", category: "Grandes" },
+  { name: "Organizador para cochecito", category: "Grandes" },
+  { name: "Trona / silla de comer", category: "Grandes" },
 
   // Juguetes
   { name: "Sonajero de tela", category: "Juguetes", maxQuantity: 4 },
   { name: "Juguetes constructores / mordedores", category: "Juguetes", maxQuantity: 4 },
+  { name: "Libro de tela", category: "Juguetes", maxQuantity: 4 },
+  { name: "Libro de baño", category: "Juguetes", maxQuantity: 3 },
+  { name: "Cubos blandos", category: "Juguetes", maxQuantity: 3 },
+  { name: "Juguetes sensoriales", category: "Juguetes", maxQuantity: 4 },
+  { name: "Pelota blanda", category: "Juguetes", maxQuantity: 3 },
+
+  // Seguridad (categoría dinámica: el sistema agrupa por el string category)
+  { name: "Termómetro digital", category: "Seguridad" },
+  { name: "Aspirador nasal", category: "Seguridad" },
+  { name: "Protector de enchufes", category: "Seguridad", maxQuantity: 4 },
 
   // Recuerdos
   { name: "Álbum de fotos / mi primer año", category: "Recuerdos" },
