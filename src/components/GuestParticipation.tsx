@@ -7,9 +7,12 @@ import { isAlreadyHaveGift, visibleGiftNotes } from "@/lib/gift-status";
 import {
   CLOTHING_SIZES,
   CLOTHING_SLEEVES,
+  CLOTHING_SOFT_ALERT_AT,
   CLOTHING_TYPES,
+  countClothingByType,
   formatClothingChoice,
   isClothingPickerGift,
+  parseClothingType,
 } from "@/lib/clothing";
 
 type Props = {
@@ -44,103 +47,36 @@ export default function GuestParticipation({
     return [...fromList, ...clothingChoices];
   }, [selectedIds, clothingChoices, giftById]);
 
+  const clothingCounts = useMemo(
+    () => countClothingByType(gifts, clothingChoices),
+    [gifts, clothingChoices]
+  );
+
+  const softClothingAlerts = useMemo(
+    () =>
+      Array.from(clothingCounts.entries())
+        .filter(([, count]) => count >= CLOTHING_SOFT_ALERT_AT)
+        .sort((a, b) => b[1] - a[1]),
+    [clothingCounts]
+  );
+
+  const currentTypeCount = clothingCounts.get(clothType) ?? 0;
+
+  // Ropa nunca se lista como checkbox: solo el selector (ilimitado).
   const grouped = new Map<string, GiftWithClaim[]>();
   for (const gift of gifts) {
-    if (isClothingPickerGift(gift)) continue; // se renderiza aparte
+    if (isClothingPickerGift(gift)) continue;
+    if ((gift.category ?? "") === "Ropa") continue;
+    if (parseClothingType(gift.name)) continue;
     const key = gift.category ?? "Otros";
     if (!grouped.has(key)) grouped.set(key, []);
     grouped.get(key)!.push(gift);
   }
-
-  // Si no hay ítem "Ropa a elección" (listas viejas), igual mostramos el selector.
   if (!grouped.has("Ropa")) grouped.set("Ropa", []);
-
-  function clothingPickerBlock() {
-    return (
-      <li className="space-y-3 px-4 py-4">
-        <div>
-          <p className="text-sm font-medium text-ink-900">Ropa a elección</p>
-          <p className="mt-0.5 text-xs text-ink-700">
-            Elegí talle y tipo. Así no se “agota” un pijama concreto: cada quien
-            puede llevar lo que prefiera.
-          </p>
-        </div>
-        <div className="grid gap-2 sm:grid-cols-3">
-          <label className="block text-xs text-ink-700">
-            Tipo
-            <select
-              value={clothType}
-              onChange={(e) => setClothType(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-ink-900/15 bg-white px-2 py-2 text-sm text-ink-900 outline-none focus:border-sage-500"
-            >
-              {CLOTHING_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="block text-xs text-ink-700">
-            Talle
-            <select
-              value={clothSize}
-              onChange={(e) => setClothSize(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-ink-900/15 bg-white px-2 py-2 text-sm text-ink-900 outline-none focus:border-sage-500"
-            >
-              {CLOTHING_SIZES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="block text-xs text-ink-700">
-            Manga
-            <select
-              value={clothSleeve}
-              onChange={(e) => setClothSleeve(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-ink-900/15 bg-white px-2 py-2 text-sm text-ink-900 outline-none focus:border-sage-500"
-            >
-              {CLOTHING_SLEEVES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <button
-          type="button"
-          onClick={addClothingChoice}
-          className="rounded-lg bg-sage-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-sage-700"
-        >
-          Sumar esta ropa a mi selección
-        </button>
-        {clothingChoices.length > 0 && (
-          <ul className="space-y-1">
-            {clothingChoices.map((label) => (
-              <li
-                key={label}
-                className="flex items-center justify-between gap-2 rounded-lg bg-sage-50 px-3 py-2 text-xs text-sage-800"
-              >
-                <span>{label}</span>
-                <button
-                  type="button"
-                  onClick={() => removeClothingChoice(label)}
-                  className="text-ink-700 hover:text-ink-900"
-                >
-                  Quitar
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </li>
-    );
-  }
 
   function toggleGift(gift: GiftWithClaim) {
     if (isAlreadyHaveGift(gift) || isClothingPickerGift(gift)) return;
+    if ((gift.category ?? "") === "Ropa") return;
 
     const takenExclusive = !gift.max_quantity && gift.claimed;
     if (takenExclusive && !selectedIds.includes(gift.id)) return;
@@ -199,74 +135,182 @@ export default function GuestParticipation({
               {category}
             </h2>
             <ul className="mt-2 divide-y divide-ink-900/10 rounded-xl2 border border-ink-900/10 bg-white/70">
-              {category === "Ropa" ? clothingPickerBlock() : null}
-              {items.map((gift) => {
-                const alreadyHave = isAlreadyHaveGift(gift);
-                const notes = visibleGiftNotes(gift.notes);
+              {category === "Ropa" ? (
+                <li className="space-y-3 px-4 py-4">
+                  <div>
+                    <p className="text-sm font-medium text-ink-900">Ropa a elección</p>
+                    <p className="mt-0.5 text-xs text-ink-700">
+                      Podés sumar toda la ropa que quieras: no se agota. Elegí
+                      talle y tipo; si ya hay varios del mismo, te avisamos con
+                      un tip.
+                    </p>
+                  </div>
 
-                if (alreadyHave) {
+                  {softClothingAlerts.length > 0 && (
+                    <div className="rounded-lg border border-sage-200 bg-sage-50/90 px-3 py-2 text-xs text-sage-800">
+                      <p className="font-medium">Tip (no es un límite)</p>
+                      <ul className="mt-1 list-disc space-y-0.5 pl-4">
+                        {softClothingAlerts.map(([type, count]) => (
+                          <li key={type}>
+                            {count} ya traen {type.toLowerCase()}. Si preferís,
+                            podés elegir otra cosa.
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    <label className="block text-xs text-ink-700">
+                      Tipo
+                      <select
+                        value={clothType}
+                        onChange={(e) => setClothType(e.target.value)}
+                        className="mt-1 w-full rounded-lg border border-ink-900/15 bg-white px-2 py-2 text-sm text-ink-900 outline-none focus:border-sage-500"
+                      >
+                        {CLOTHING_TYPES.map((t) => (
+                          <option key={t} value={t}>
+                            {t}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="block text-xs text-ink-700">
+                      Talle
+                      <select
+                        value={clothSize}
+                        onChange={(e) => setClothSize(e.target.value)}
+                        className="mt-1 w-full rounded-lg border border-ink-900/15 bg-white px-2 py-2 text-sm text-ink-900 outline-none focus:border-sage-500"
+                      >
+                        {CLOTHING_SIZES.map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="block text-xs text-ink-700">
+                      Manga
+                      <select
+                        value={clothSleeve}
+                        onChange={(e) => setClothSleeve(e.target.value)}
+                        className="mt-1 w-full rounded-lg border border-ink-900/15 bg-white px-2 py-2 text-sm text-ink-900 outline-none focus:border-sage-500"
+                      >
+                        {CLOTHING_SLEEVES.map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+
+                  {currentTypeCount >= CLOTHING_SOFT_ALERT_AT && (
+                    <p className="text-xs text-ink-700">
+                      Tip: ya hay {currentTypeCount} que traen{" "}
+                      {clothType.toLowerCase()}. Igual podés sumarlo si querés.
+                    </p>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={addClothingChoice}
+                    className="rounded-lg bg-sage-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-sage-700"
+                  >
+                    Sumar esta ropa a mi selección
+                  </button>
+
+                  {clothingChoices.length > 0 && (
+                    <ul className="space-y-1">
+                      {clothingChoices.map((label) => (
+                        <li
+                          key={label}
+                          className="flex items-center justify-between gap-2 rounded-lg bg-sage-50 px-3 py-2 text-xs text-sage-800"
+                        >
+                          <span>{label}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeClothingChoice(label)}
+                            className="text-ink-700 hover:text-ink-900"
+                          >
+                            Quitar
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              ) : null}
+
+              {category !== "Ropa" &&
+                items.map((gift) => {
+                  const alreadyHave = isAlreadyHaveGift(gift);
+                  const notes = visibleGiftNotes(gift.notes);
+
+                  if (alreadyHave) {
+                    return (
+                      <li key={gift.id} className="flex items-start gap-3 px-4 py-3">
+                        <span
+                          aria-hidden
+                          className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border border-ink-900/20 bg-ink-900/5 text-[10px] text-ink-700"
+                        >
+                          ✓
+                        </span>
+                        <div>
+                          <p className="text-sm text-ink-800">{gift.name}</p>
+                          {notes ? <p className="text-xs text-ink-700">{notes}</p> : null}
+                          <span className="text-xs font-medium text-ink-700">
+                            Ya lo tenemos
+                          </span>
+                        </div>
+                      </li>
+                    );
+                  }
+
+                  const mine = selectedIds.includes(gift.id);
+                  const takenExclusive = !gift.max_quantity && gift.claimed;
+                  const fullMulti =
+                    gift.max_quantity != null && gift.claimedCount >= gift.max_quantity;
+                  const locked = (takenExclusive || fullMulti) && !mine;
+
                   return (
                     <li key={gift.id} className="flex items-start gap-3 px-4 py-3">
-                      <span
-                        aria-hidden
-                        className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border border-ink-900/20 bg-ink-900/5 text-[10px] text-ink-700"
-                      >
-                        ✓
-                      </span>
+                      <input
+                        type="checkbox"
+                        checked={mine}
+                        disabled={isPending || locked}
+                        onChange={() => toggleGift(gift)}
+                        className="mt-0.5 h-5 w-5 shrink-0 rounded border-ink-900/30 text-sage-600 focus:ring-sage-500 disabled:opacity-70"
+                      />
                       <div>
-                        <p className="text-sm text-ink-800">{gift.name}</p>
+                        <p
+                          className={
+                            locked
+                              ? "text-sm text-ink-700 line-through"
+                              : "text-sm text-ink-900"
+                          }
+                        >
+                          {gift.name}
+                        </p>
                         {notes ? <p className="text-xs text-ink-700">{notes}</p> : null}
-                        <span className="text-xs font-medium text-ink-700">
-                          Ya lo tenemos
-                        </span>
+                        {gift.max_quantity ? (
+                          <span className="text-xs text-sage-600">
+                            {gift.claimedCount} de {gift.max_quantity} ya avisaron que lo
+                            llevan
+                          </span>
+                        ) : locked ? (
+                          <span className="text-xs text-sage-600">
+                            Alguien ya avisó que lo lleva
+                          </span>
+                        ) : mine ? (
+                          <span className="text-xs text-sage-600">
+                            En tu selección (podés destildar si te arrepentís)
+                          </span>
+                        ) : null}
                       </div>
                     </li>
                   );
-                }
-
-                const mine = selectedIds.includes(gift.id);
-                const takenExclusive = !gift.max_quantity && gift.claimed;
-                const fullMulti =
-                  gift.max_quantity != null && gift.claimedCount >= gift.max_quantity;
-                const locked = (takenExclusive || fullMulti) && !mine;
-
-                return (
-                  <li key={gift.id} className="flex items-start gap-3 px-4 py-3">
-                    <input
-                      type="checkbox"
-                      checked={mine}
-                      disabled={isPending || locked}
-                      onChange={() => toggleGift(gift)}
-                      className="mt-0.5 h-5 w-5 shrink-0 rounded border-ink-900/30 text-sage-600 focus:ring-sage-500 disabled:opacity-70"
-                    />
-                    <div>
-                      <p
-                        className={
-                          locked
-                            ? "text-sm text-ink-700 line-through"
-                            : "text-sm text-ink-900"
-                        }
-                      >
-                        {gift.name}
-                      </p>
-                      {notes ? <p className="text-xs text-ink-700">{notes}</p> : null}
-                      {gift.max_quantity ? (
-                        <span className="text-xs text-sage-600">
-                          {gift.claimedCount} de {gift.max_quantity} ya avisaron que lo llevan
-                        </span>
-                      ) : locked ? (
-                        <span className="text-xs text-sage-600">
-                          Alguien ya avisó que lo lleva
-                        </span>
-                      ) : mine ? (
-                        <span className="text-xs text-sage-600">
-                          En tu selección (podés destildar si te arrepentís)
-                        </span>
-                      ) : null}
-                    </div>
-                  </li>
-                );
-              })}
+                })}
             </ul>
           </div>
         ))}
