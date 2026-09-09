@@ -11,7 +11,12 @@ import Link from "next/link";
 
 export const maxDuration = 60;
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams?: { error?: string };
+}) {
+  const params = searchParams ?? {};
   const supabase = await createClient();
   const {
     data: { user },
@@ -30,6 +35,11 @@ export default async function DashboardPage() {
           Con esto armamos tu página, la invitación y una lista base de regalos
           que después vas a poder editar.
         </p>
+        {params.error ? (
+          <p className="mt-4 rounded-xl2 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+            No se pudo crear el evento: {params.error}
+          </p>
+        ) : null}
         <form action={createEvent} className="mt-6 space-y-4">
           <InvitationSetup />
           <Field

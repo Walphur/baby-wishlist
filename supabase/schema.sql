@@ -231,6 +231,15 @@ drop policy if exists "baby_events_owner_select" on public.baby_events;
 create policy "baby_events_owner_select" on public.baby_events
   for select using (public.is_baby_event_manager(id));
 
+-- Insert/delete siguen siendo solo del dueño (crear evento / borrar lista).
+drop policy if exists "baby_events_owner_insert" on public.baby_events;
+create policy "baby_events_owner_insert" on public.baby_events
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "baby_events_owner_delete" on public.baby_events;
+create policy "baby_events_owner_delete" on public.baby_events
+  for delete using (auth.uid() = user_id);
+
 drop policy if exists "baby_events_owner_update" on public.baby_events;
 create policy "baby_events_owner_update" on public.baby_events
   for update using (public.is_baby_event_manager(id));

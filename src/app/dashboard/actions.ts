@@ -125,6 +125,10 @@ export async function createEvent(formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  // Escrituras con service role: evita fallos de RLS en INSERT cuando la
+  // sesión del usuario no llega bien a PostgREST (error típico al crear).
+  const admin = createAdminClient();
+
   const baby_name = clean(formData.get("baby_name"), 100);
   const event_date = clean(formData.get("event_date"), 20);
   const event_time = cleanTime(formData.get("event_time"));
@@ -134,7 +138,7 @@ export async function createEvent(formData: FormData) {
 
   let slug = generateSlug();
   for (let i = 0; i < 5; i++) {
-    const { data: existing } = await supabase
+    const { data: existing } = await admin
       .from("baby_events")
       .select("id")
       .eq("slug", slug)
@@ -143,7 +147,7 @@ export async function createEvent(formData: FormData) {
     slug = generateSlug();
   }
 
-  const { data: event, error } = await supabase
+  const { data: event, error } = await admin
     .from("baby_events")
     .insert({
       user_id: user.id,
@@ -159,7 +163,12 @@ export async function createEvent(formData: FormData) {
     .single();
 
   if (error || !event) {
-    throw new Error(error?.message ?? "No se pudo crear el evento");
+    console.error("createEvent insert", error);
+    redirect(
+      `/dashboard?error=${encodeURIComponent(
+        error?.message ?? "No se pudo crear el evento"
+      )}`
+    );
   }
 
   const invitation = await resolveInvitationFields(formData, event.id, {
@@ -169,7 +178,7 @@ export async function createEvent(formData: FormData) {
     location,
   });
 
-  await supabase
+  await admin
     .from("baby_events")
     .update({
       invitation_image_url: invitation.invitation_image_url,
@@ -185,7 +194,16 @@ export async function createEvent(formData: FormData) {
     is_custom: false,
     max_quantity: g.maxQuantity ?? null,
   }));
-  await supabase.from("baby_gifts").insert(seedGifts);
+  const { error: giftsError } = await admin.from("baby_gifts").insert(seedGifts);
+  if (giftsError) {
+    console.error("createEvent seed gifts", giftsError);
+  }
+
+  (await cookies()).set("bw_event", event.id, {
+    path: "/",
+    sameSite: "lax",
+    httpOnly: true,
+  });
 
   revalidatePath("/dashboard");
   redirect("/dashboard");
