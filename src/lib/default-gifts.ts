@@ -12,8 +12,8 @@ export type DefaultGift = {
  */
 export const DEFAULT_GIFTS: DefaultGift[] = [
   // Higiene y cambio
-  { name: "Pack de pañales talle RN", category: "Higiene y cambio", maxQuantity: 8 },
   { name: "Pack de pañales talle P", category: "Higiene y cambio", maxQuantity: 8 },
+  { name: "Pack de pañales talle M", category: "Higiene y cambio", maxQuantity: 6 },
   { name: "Toallitas húmedas sin perfume", category: "Higiene y cambio", maxQuantity: 10 },
   { name: "Óleo calcáreo", category: "Higiene y cambio", maxQuantity: 6 },
   { name: "Crema para paspaduras", category: "Higiene y cambio", maxQuantity: 6 },
