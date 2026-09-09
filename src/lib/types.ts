@@ -27,6 +27,7 @@ export type GiftRow = {
   notes: string | null;
   is_custom: boolean;
   max_quantity: number | null;
+  already_have?: boolean;
   created_at: string;
 };
 

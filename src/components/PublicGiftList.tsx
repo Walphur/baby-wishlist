@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { toggleClaim, addClaim, addGuestGift } from "@/app/e/[slug]/actions";
 import type { GiftWithClaim } from "@/lib/types";
+import { isAlreadyHaveGift, visibleGiftNotes } from "@/lib/gift-status";
 
 export default function PublicGiftList({
   slug,
@@ -70,63 +71,88 @@ export default function PublicGiftList({
             {category}
           </h2>
           <ul className="mt-2 divide-y divide-ink-900/10 rounded-xl2 border border-ink-900/10 bg-white/70">
-            {items.map((gift) => (
-              <li key={gift.id} className="flex items-start gap-3 px-4 py-3">
-                {gift.max_quantity ? (
-                  <div className="flex w-full items-center justify-between gap-3">
+            {items.map((gift) => {
+              const alreadyHave = isAlreadyHaveGift(gift);
+              const notes = visibleGiftNotes(gift.notes);
+
+              if (alreadyHave) {
+                return (
+                  <li key={gift.id} className="flex items-start gap-3 px-4 py-3">
+                    <span
+                      aria-hidden
+                      className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border border-ink-900/20 bg-ink-900/5 text-[10px] text-ink-700"
+                    >
+                      ✓
+                    </span>
                     <div>
-                      <p className="text-sm text-ink-900">{gift.name}</p>
-                      {gift.notes && <p className="text-xs text-ink-700">{gift.notes}</p>}
-                      <span className="text-xs text-sage-600">
-                        {gift.claimedCount} de {gift.max_quantity} ya avisaron que lo llevan
+                      <p className="text-sm text-ink-800">{gift.name}</p>
+                      {notes ? <p className="text-xs text-ink-700">{notes}</p> : null}
+                      <span className="text-xs font-medium text-ink-700">
+                        Ya lo tenemos
                       </span>
                     </div>
-                    <div className="flex shrink-0 items-center gap-2">
-                      <button
-                        type="button"
-                        disabled={isPending || gift.claimedCount >= gift.max_quantity}
-                        onClick={() => handleAdd(gift.id)}
-                        aria-label="Sumarme a llevar esto"
-                        className="flex h-9 w-9 items-center justify-center rounded-full bg-sage-600 text-lg text-white disabled:opacity-40"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <input
-                      type="checkbox"
-                      checked={gift.claimed}
-                      disabled={isPending || gift.claimed}
-                      onChange={() => {
-                        if (!gift.claimed) handleToggle(gift.id);
-                      }}
-                      className="mt-0.5 h-5 w-5 shrink-0 rounded border-ink-900/30 text-sage-600 focus:ring-sage-500 disabled:opacity-70"
-                    />
-                    <div>
-                      <p
-                        className={
-                          gift.claimed
-                            ? "text-sm text-ink-700 line-through"
-                            : "text-sm text-ink-900"
-                        }
-                      >
-                        {gift.name}
-                      </p>
-                      {gift.notes && (
-                        <p className="text-xs text-ink-700">{gift.notes}</p>
-                      )}
-                      {gift.claimed && (
+                  </li>
+                );
+              }
+
+              return (
+                <li key={gift.id} className="flex items-start gap-3 px-4 py-3">
+                  {gift.max_quantity ? (
+                    <div className="flex w-full items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm text-ink-900">{gift.name}</p>
+                        {notes ? <p className="text-xs text-ink-700">{notes}</p> : null}
                         <span className="text-xs text-sage-600">
-                          Ya alguien va a llevar esto
+                          {gift.claimedCount} de {gift.max_quantity} ya avisaron que lo llevan
                         </span>
-                      )}
+                      </div>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <button
+                          type="button"
+                          disabled={isPending || gift.claimedCount >= gift.max_quantity}
+                          onClick={() => handleAdd(gift.id)}
+                          aria-label="Sumarme a llevar esto"
+                          className="flex h-9 w-9 items-center justify-center rounded-full bg-sage-600 text-lg text-white disabled:opacity-40"
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
-                  </>
-                )}
-              </li>
-            ))}
+                  ) : (
+                    <>
+                      <input
+                        type="checkbox"
+                        checked={gift.claimed}
+                        disabled={isPending || gift.claimed}
+                        onChange={() => {
+                          if (!gift.claimed) handleToggle(gift.id);
+                        }}
+                        className="mt-0.5 h-5 w-5 shrink-0 rounded border-ink-900/30 text-sage-600 focus:ring-sage-500 disabled:opacity-70"
+                      />
+                      <div>
+                        <p
+                          className={
+                            gift.claimed
+                              ? "text-sm text-ink-700 line-through"
+                              : "text-sm text-ink-900"
+                          }
+                        >
+                          {gift.name}
+                        </p>
+                        {notes ? (
+                          <p className="text-xs text-ink-700">{notes}</p>
+                        ) : null}
+                        {gift.claimed && (
+                          <span className="text-xs text-sage-600">
+                            Ya alguien va a llevar esto
+                          </span>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
       ))}

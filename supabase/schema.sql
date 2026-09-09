@@ -57,6 +57,7 @@ create index if not exists baby_gifts_event_id_idx on public.baby_gifts(event_id
 
 -- Migración: agrega la columna de cantidad máxima (regalos "repetibles" como pañales/ropa).
 alter table public.baby_gifts add column if not exists max_quantity integer;
+alter table public.baby_gifts add column if not exists already_have boolean not null default false;
 
 -- ============ BABY_CLAIMS ============
 -- Una fila = una persona que avisó que va a llevar ese regalo.

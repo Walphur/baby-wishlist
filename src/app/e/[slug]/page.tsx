@@ -31,11 +31,20 @@ export default async function EventPage({
 
   if (!event) notFound();
 
-  const { data: gifts } = await supabase
+  let { data: gifts, error: giftsError } = await supabase
     .from("baby_gifts")
-    .select("id, event_id, name, category, notes, is_custom, max_quantity, created_at")
+    .select("id, event_id, name, category, notes, is_custom, max_quantity, already_have, created_at")
     .eq("event_id", event.id)
     .order("category");
+
+  if (giftsError) {
+    const fallback = await supabase
+      .from("baby_gifts")
+      .select("id, event_id, name, category, notes, is_custom, max_quantity, created_at")
+      .eq("event_id", event.id)
+      .order("category");
+    gifts = (fallback.data ?? []).map((g) => ({ ...g, already_have: false }));
+  }
 
   const giftIds = (gifts ?? []).map((g) => g.id);
   const { data: claims } =

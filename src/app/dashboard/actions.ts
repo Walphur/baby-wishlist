@@ -23,6 +23,9 @@ import {
   uploadUserInvitationImage,
 } from "@/lib/invitation-upload";
 import { isAdminEmail } from "@/lib/admin";
+import {
+  withAlreadyHaveNotes,
+} from "@/lib/gift-status";
 
 const MAX_TEXT = 200;
 const MAX_MESSAGE = 500;
@@ -457,15 +460,91 @@ export async function addOwnerGift(eventId: string, formData: FormData) {
 
   const name = clean(formData.get("name"), 120);
   const category = clean(formData.get("category"), 60);
+  const notesRaw = clean(formData.get("notes"), 200);
+  const alreadyHave = formData.get("already_have") === "on";
   const maxQuantityRaw = Number(formData.get("max_quantity") ?? 0);
-  const max_quantity = maxQuantityRaw > 1 ? Math.min(Math.round(maxQuantityRaw), 50) : null;
+  const max_quantity =
+    alreadyHave || maxQuantityRaw <= 1
+      ? null
+      : Math.min(Math.round(maxQuantityRaw), 50);
   if (!name) return;
 
-  await supabase
-    .from("baby_gifts")
-    .insert({ event_id: eventId, name, category, is_custom: true, max_quantity });
+  const notes = withAlreadyHaveNotes(notesRaw, alreadyHave);
+  const admin = createAdminClient();
+
+  const payload: Record<string, unknown> = {
+    event_id: eventId,
+    name,
+    category,
+    notes,
+    is_custom: true,
+    max_quantity,
+    already_have: alreadyHave,
+  };
+
+  const { error } = await admin.from("baby_gifts").insert(payload);
+  if (error) {
+    // Si la columna already_have aún no existe en Supabase, reintentamos sin ella.
+    const { already_have: _ignored, ...fallback } = payload;
+    await admin.from("baby_gifts").insert(fallback);
+  }
 
   revalidatePath("/dashboard/regalos");
+  revalidatePath("/dashboard");
+}
+
+export async function updateGift(giftId: string, formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: gift } = await supabase
+    .from("baby_gifts")
+    .select("id, event_id")
+    .eq("id", giftId)
+    .maybeSingle();
+  if (!gift) return;
+
+  await requireEventAccess(user, gift.event_id);
+
+  const name = clean(formData.get("name"), 120);
+  const category = clean(formData.get("category"), 60);
+  const notesRaw = clean(formData.get("notes"), 200);
+  const alreadyHave = formData.get("already_have") === "on";
+  const maxQuantityRaw = Number(formData.get("max_quantity") ?? 0);
+  const max_quantity =
+    alreadyHave || maxQuantityRaw <= 1
+      ? null
+      : Math.min(Math.round(maxQuantityRaw), 50);
+  if (!name) return;
+
+  const notes = withAlreadyHaveNotes(notesRaw, alreadyHave);
+  const admin = createAdminClient();
+  const payload: Record<string, unknown> = {
+    name,
+    category,
+    notes,
+    max_quantity,
+    already_have: alreadyHave,
+  };
+
+  const { error } = await admin.from("baby_gifts").update(payload).eq("id", giftId);
+  if (error) {
+    const { already_have: _ignored, ...fallback } = payload;
+    await admin.from("baby_gifts").update(fallback).eq("id", giftId);
+  }
+
+  const { data: event } = await admin
+    .from("baby_events")
+    .select("slug")
+    .eq("id", gift.event_id)
+    .maybeSingle();
+
+  revalidatePath("/dashboard/regalos");
+  revalidatePath("/dashboard");
+  if (event?.slug) revalidatePath(`/e/${event.slug}`);
 }
 
 export async function deleteGift(giftId: string) {
@@ -475,7 +554,8 @@ export async function deleteGift(giftId: string) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  await supabase.from("baby_gifts").delete().eq("id", giftId);
+  const admin = createAdminClient();
+  await admin.from("baby_gifts").delete().eq("id", giftId);
   revalidatePath("/dashboard/regalos");
 }
 

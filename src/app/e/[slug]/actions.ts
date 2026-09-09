@@ -2,25 +2,48 @@
 
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isAlreadyHaveGift } from "@/lib/gift-status";
 
 const MAX_NAME_LEN = 120;
 const MAX_NOTE_LEN = 200;
 
 export type ClaimResult = { ok: boolean; message: string };
 
+async function loadGiftForClaim(slug: string, giftId: string) {
+  const supabase = createAdminClient();
+  const withFlag = await supabase
+    .from("baby_gifts")
+    .select("id, name, max_quantity, notes, already_have, baby_events!inner(slug)")
+    .eq("id", giftId)
+    .eq("baby_events.slug", slug)
+    .maybeSingle();
+
+  if (!withFlag.error) return withFlag.data;
+
+  const fallback = await supabase
+    .from("baby_gifts")
+    .select("id, name, max_quantity, notes, baby_events!inner(slug)")
+    .eq("id", giftId)
+    .eq("baby_events.slug", slug)
+    .maybeSingle();
+
+  return fallback.data ? { ...fallback.data, already_have: false } : null;
+}
+
 // Regalos sin max_quantity: solo una persona puede llevarlo (checkbox).
 export async function toggleClaim(slug: string, giftId: string): Promise<ClaimResult> {
   if (!giftId) return { ok: false, message: "Regalo inválido." };
   const supabase = createAdminClient();
 
-  const { data: gift } = await supabase
-    .from("baby_gifts")
-    .select("id, name, max_quantity, baby_events!inner(slug)")
-    .eq("id", giftId)
-    .eq("baby_events.slug", slug)
-    .maybeSingle();
-
+  const gift = await loadGiftForClaim(slug, giftId);
   if (!gift) return { ok: false, message: "No encontramos ese regalo." };
+
+  if (isAlreadyHaveGift(gift)) {
+    return {
+      ok: false,
+      message: "Eso ya lo tienen. Elegí otro regalo de la lista.",
+    };
+  }
 
   const { data: existingClaim } = await supabase
     .from("baby_claims")
@@ -45,14 +68,15 @@ export async function addClaim(slug: string, giftId: string): Promise<ClaimResul
   if (!giftId) return { ok: false, message: "Regalo inválido." };
   const supabase = createAdminClient();
 
-  const { data: gift } = await supabase
-    .from("baby_gifts")
-    .select("id, name, max_quantity, baby_events!inner(slug)")
-    .eq("id", giftId)
-    .eq("baby_events.slug", slug)
-    .maybeSingle();
-
+  const gift = await loadGiftForClaim(slug, giftId);
   if (!gift) return { ok: false, message: "No encontramos ese regalo." };
+
+  if (isAlreadyHaveGift(gift)) {
+    return {
+      ok: false,
+      message: "Eso ya lo tienen. Elegí otro regalo de la lista.",
+    };
+  }
 
   const { count } = await supabase
     .from("baby_claims")
