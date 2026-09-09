@@ -58,7 +58,11 @@ async function resolveInvitationFields(
     location: string | null;
     invitation_template_id: string | null;
     invitation_image_url: string | null;
-  } | null
+  } | null,
+  options?: {
+    /** En create: no llamar a OpenAI (evita 504). La plantilla alcanza; regenerar en Evento. */
+    deferAi?: boolean;
+  }
 ) {
   const templateChoice = templateFromForm(formData);
 
@@ -76,7 +80,15 @@ async function resolveInvitationFields(
     };
   }
 
+  const templateUrl = `${INVITATION_TEMPLATE_PREFIX}${templateChoice}`;
   const forceRegenerate = formData.get("regenerate_invitation") === "on";
+
+  if (options?.deferAi && !forceRegenerate) {
+    return {
+      invitation_template_id: templateChoice,
+      invitation_image_url: templateUrl,
+    };
+  }
 
   const sameInvitePayload =
     !forceRegenerate &&
@@ -106,8 +118,7 @@ async function resolveInvitationFields(
 
   return {
     invitation_template_id: templateChoice,
-    invitation_image_url:
-      generated ?? `${INVITATION_TEMPLATE_PREFIX}${templateChoice}`,
+    invitation_image_url: generated ?? templateUrl,
   };
 }
 
@@ -135,6 +146,13 @@ export async function createEvent(formData: FormData) {
   const location = clean(formData.get("location"), MAX_TEXT);
   const host_names = clean(formData.get("host_names"), MAX_TEXT);
   const message = clean(formData.get("message"), MAX_MESSAGE);
+  const location_map_url = clean(formData.get("location_map_url"), 500);
+  const drive_url = clean(formData.get("drive_url"), 500);
+  const ask_party_size = formData.get("ask_party_size") === "on";
+  const guest_list_reveal_days = Math.min(
+    Math.max(Number(formData.get("guest_list_reveal_days") ?? 14) || 14, 0),
+    365
+  );
 
   let slug = generateSlug();
   for (let i = 0; i < 5; i++) {
@@ -147,6 +165,19 @@ export async function createEvent(formData: FormData) {
     slug = generateSlug();
   }
 
+  const invitation = await resolveInvitationFields(
+    formData,
+    "pending",
+    {
+      baby_name,
+      event_date,
+      event_time,
+      location,
+    },
+    null,
+    { deferAi: true }
+  );
+
   const { data: event, error } = await admin
     .from("baby_events")
     .insert({
@@ -158,6 +189,12 @@ export async function createEvent(formData: FormData) {
       location,
       host_names,
       message,
+      location_map_url,
+      drive_url,
+      ask_party_size,
+      guest_list_reveal_days,
+      invitation_image_url: invitation.invitation_image_url,
+      invitation_template_id: invitation.invitation_template_id,
     })
     .select("id")
     .single();
@@ -170,22 +207,6 @@ export async function createEvent(formData: FormData) {
       )}`
     );
   }
-
-  const invitation = await resolveInvitationFields(formData, event.id, {
-    baby_name,
-    event_date,
-    event_time,
-    location,
-  });
-
-  await admin
-    .from("baby_events")
-    .update({
-      invitation_image_url: invitation.invitation_image_url,
-      invitation_template_id: invitation.invitation_template_id,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", event.id);
 
   const seedGifts = DEFAULT_GIFTS.map((g) => ({
     event_id: event.id,
@@ -206,7 +227,8 @@ export async function createEvent(formData: FormData) {
   });
 
   revalidatePath("/dashboard");
-  redirect("/dashboard");
+  revalidatePath("/dashboard/regalos");
+  redirect("/dashboard/regalos");
 }
 
 export async function deleteEvent(eventId: string, formData: FormData) {
@@ -314,8 +336,9 @@ export async function resetDefaultGifts(eventId: string) {
   if (!user) redirect("/login");
 
   await requireEventAccess(user, eventId);
+  const admin = createAdminClient();
 
-  await supabase.from("baby_gifts").delete().eq("event_id", eventId).eq("is_custom", false);
+  await admin.from("baby_gifts").delete().eq("event_id", eventId).eq("is_custom", false);
 
   const seedGifts = DEFAULT_GIFTS.map((g) => ({
     event_id: eventId,
@@ -324,7 +347,10 @@ export async function resetDefaultGifts(eventId: string) {
     is_custom: false,
     max_quantity: g.maxQuantity ?? null,
   }));
-  await supabase.from("baby_gifts").insert(seedGifts);
+  const { error } = await admin.from("baby_gifts").insert(seedGifts);
+  if (error) {
+    console.error("resetDefaultGifts", error);
+  }
 
   revalidatePath("/dashboard/regalos");
 }

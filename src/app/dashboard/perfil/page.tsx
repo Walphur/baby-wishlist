@@ -43,6 +43,7 @@ export default async function PerfilPage({
       <form action={updateEventWithId} className="mt-6 space-y-4">
         <InvitationSetup
           allowCustom
+          showAiRegenerate
           defaultBabyName={event.baby_name ?? ""}
           defaultEventDate={event.event_date ?? ""}
           defaultEventTime={event.event_time ?? ""}

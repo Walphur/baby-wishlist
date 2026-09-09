@@ -53,9 +53,40 @@ export default async function DashboardPage({
             textarea
             placeholder="Ej: ¡Gracias por acompañarnos en este momento tan especial!"
           />
+          <Field
+            label="Link a Google Maps del lugar (opcional)"
+            name="location_map_url"
+            placeholder="https://maps.app.goo.gl/..."
+          />
+          <Field
+            label="Link a Google Drive con fotos (opcional)"
+            name="drive_url"
+            placeholder="https://drive.google.com/..."
+          />
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              name="ask_party_size"
+              defaultChecked
+              className="h-4 w-4 rounded border-ink-900/30 text-sage-600 focus:ring-sage-500"
+            />
+            <span className="text-sm text-ink-800">
+              Preguntar cuántas personas van al confirmar asistencia
+            </span>
+          </label>
+          <Field
+            label="Ocultar los nombres de invitados hasta X días antes del evento"
+            name="guest_list_reveal_days"
+            type="number"
+            defaultValue="14"
+          />
+          <p className="-mt-2 text-xs text-ink-700">
+            Ayuda a que no se pueda relacionar quién confirmó asistencia con qué
+            regalo reservó (los regalos son anónimos a propósito).
+          </p>
           <SubmitButton
             idleLabel="Crear mi lista"
-            pendingLabel="Generando la imagen… esperá un momento"
+            pendingLabel="Creando tu lista…"
             className="rounded-xl2 bg-ink-900 px-6 py-3 text-sm font-medium text-cream-50 transition hover:bg-ink-800 disabled:opacity-60"
           />
         </form>
@@ -236,12 +267,14 @@ function Field({
   type = "text",
   placeholder,
   textarea,
+  defaultValue,
 }: {
   label: string;
   name: string;
   type?: string;
   placeholder?: string;
   textarea?: boolean;
+  defaultValue?: string;
 }) {
   return (
     <label className="block">
@@ -250,6 +283,7 @@ function Field({
         <textarea
           name={name}
           placeholder={placeholder}
+          defaultValue={defaultValue}
           rows={3}
           className="mt-1 w-full rounded-lg border border-ink-900/15 bg-white px-3 py-2 text-sm text-ink-900 outline-none focus:border-sage-500"
         />
@@ -258,6 +292,7 @@ function Field({
           type={type}
           name={name}
           placeholder={placeholder}
+          defaultValue={defaultValue}
           className="mt-1 w-full rounded-lg border border-ink-900/15 bg-white px-3 py-2 text-sm text-ink-900 outline-none focus:border-sage-500"
         />
       )}

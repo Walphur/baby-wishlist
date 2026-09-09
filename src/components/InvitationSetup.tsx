@@ -11,6 +11,8 @@ import {
 
 type InvitationSetupProps = {
   allowCustom?: boolean;
+  /** Mostrar checkbox para regenerar con IA (solo al editar evento). */
+  showAiRegenerate?: boolean;
   defaultBabyName?: string;
   defaultEventDate?: string;
   defaultEventTime?: string;
@@ -27,6 +29,7 @@ function normalizeTime(value: string) {
 
 export default function InvitationSetup({
   allowCustom = false,
+  showAiRegenerate = false,
   defaultBabyName = "",
   defaultEventDate = "",
   defaultEventTime = "",
@@ -169,8 +172,9 @@ export default function InvitationSetup({
       {templateId && !usingCustom && (
         <div>
           <p className="mb-2 text-xs font-medium text-ink-700">
-            Vista previa rápida. Al guardar, la IA completa la tarjeta sin
-            cambiar el diseño original.
+            {showAiRegenerate
+              ? "Vista previa rápida. Al guardar con regenerar, la IA completa la tarjeta sin cambiar el diseño."
+              : "Vista previa rápida. La tarjeta queda lista al crear; podés regenerarla con IA después en Evento."}
           </p>
           <div className="relative">
             <InvitationCard
@@ -180,18 +184,20 @@ export default function InvitationSetup({
               eventTime={eventTime}
               location={location}
             />
-            <GeneratingInvitationOverlay />
+            {showAiRegenerate ? <GeneratingInvitationOverlay /> : null}
           </div>
-          <label className="mt-3 flex items-start gap-2 text-sm text-ink-800">
-            <input
-              type="checkbox"
-              name="regenerate_invitation"
-              className="mt-0.5 h-4 w-4 rounded border-ink-900/30 text-sage-600 focus:ring-sage-500"
-            />
-            <span>
-              Regenerar la imagen con IA al guardar (si la anterior quedó mal)
-            </span>
-          </label>
+          {showAiRegenerate ? (
+            <label className="mt-3 flex items-start gap-2 text-sm text-ink-800">
+              <input
+                type="checkbox"
+                name="regenerate_invitation"
+                className="mt-0.5 h-4 w-4 rounded border-ink-900/30 text-sage-600 focus:ring-sage-500"
+              />
+              <span>
+                Regenerar la imagen con IA al guardar (si la anterior quedó mal)
+              </span>
+            </label>
+          ) : null}
         </div>
       )}
     </div>

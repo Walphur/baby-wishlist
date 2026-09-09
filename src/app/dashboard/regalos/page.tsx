@@ -59,7 +59,25 @@ export default async function RegalosPage() {
       </div>
 
       <div className="space-y-6">
-        {Array.from(grouped.entries()).map(([category, items]) => (
+        {(gifts ?? []).length === 0 ? (
+          <div className="rounded-xl2 border border-dashed border-ink-900/20 bg-white/50 px-4 py-8 text-center">
+            <p className="text-sm text-ink-800">
+              Todavía no hay regalos en la lista.
+            </p>
+            <p className="mt-1 text-xs text-ink-700">
+              Cargá la lista base de ideas útiles (pañales, baño, ropa, etc.).
+            </p>
+            <form action={reset} className="mt-4">
+              <button
+                type="submit"
+                className="rounded-xl2 bg-ink-900 px-5 py-2.5 text-sm font-medium text-cream-50 transition hover:bg-ink-800"
+              >
+                Cargar lista base
+              </button>
+            </form>
+          </div>
+        ) : (
+          Array.from(grouped.entries()).map(([category, items]) => (
           <div key={category}>
             <h2 className="text-xs font-semibold uppercase tracking-wide text-sage-700">
               {category}
@@ -114,7 +132,8 @@ export default async function RegalosPage() {
               })}
             </ul>
           </div>
-        ))}
+          ))
+        )}
       </div>
 
       <div className="rounded-xl2 border border-dashed border-ink-900/20 p-4">

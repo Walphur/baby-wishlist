@@ -6,63 +6,69 @@ export type DefaultGift = {
   maxQuantity?: number;
 };
 
+/**
+ * Lista base pensada como ideas útiles (no decorativas), con talles 0-3 / 3-6 / 6-9
+ * y categorías para que sea fácil de editar después de crear el evento.
+ */
 export const DEFAULT_GIFTS: DefaultGift[] = [
-  // Grandes / de una sola persona
-  { name: "Cochecito", category: "Grandes" },
-  { name: "Cuna", category: "Grandes" },
-  { name: "Colchón para la cuna", category: "Grandes" },
-  { name: "Cambiador", category: "Grandes" },
-  { name: "Hamaca o columpio para bebé", category: "Grandes" },
-  { name: "Mecedora", category: "Grandes" },
-  { name: "Trona", category: "Grandes" },
-  { name: "Centro de juegos", category: "Grandes" },
+  // Higiene y cambio
+  { name: "Pack de pañales talle RN", category: "Higiene y cambio", maxQuantity: 8 },
+  { name: "Pack de pañales talle P", category: "Higiene y cambio", maxQuantity: 8 },
+  { name: "Toallitas húmedas sin perfume", category: "Higiene y cambio", maxQuantity: 10 },
+  { name: "Óleo calcáreo", category: "Higiene y cambio", maxQuantity: 6 },
+  { name: "Crema para paspaduras", category: "Higiene y cambio", maxQuantity: 6 },
+  { name: "Cambiador portátil impermeable", category: "Higiene y cambio" },
+  { name: "Kit para el cuidado del bebé", category: "Higiene y cambio" },
 
-  // Cuarto del bebé
-  { name: "Cubo para pañales sucios", category: "Cuarto del bebé" },
-  { name: "Móvil musical", category: "Cuarto del bebé" },
-  { name: "Luz de noche", category: "Cuarto del bebé" },
-  { name: "Máquina de ruido blanco", category: "Cuarto del bebé" },
-  { name: "Termómetro ambiente", category: "Cuarto del bebé" },
-  { name: "Sábanas para la cuna", category: "Cuarto del bebé", maxQuantity: 6 },
-  { name: "Mantas de porteo", category: "Cuarto del bebé", maxQuantity: 4 },
-
-  // Higiene (se puede repetir, son cosas baratas)
-  { name: "Pañales talle recién nacido", category: "Higiene", maxQuantity: 10 },
-  { name: "Pañales talle 1", category: "Higiene", maxQuantity: 10 },
-  { name: "Toallitas húmedas", category: "Higiene", maxQuantity: 10 },
-  { name: "Crema para la cola", category: "Higiene", maxQuantity: 6 },
-  { name: "Jabón / shampoo neutro", category: "Higiene", maxQuantity: 6 },
-
-  // Ropa (también se puede repetir)
-  { name: "Bodies (varios talles)", category: "Ropa", maxQuantity: 8 },
-  { name: "Conjuntos de ropa", category: "Ropa", maxQuantity: 8 },
-  { name: "Medias y escarpines", category: "Ropa", maxQuantity: 8 },
-  { name: "Gorritos", category: "Ropa", maxQuantity: 6 },
-  { name: "Baberos", category: "Ropa", maxQuantity: 8 },
+  // Baño
+  { name: "Bañera plástica liviana", category: "Baño" },
+  { name: "Termómetro de agua / baño", category: "Baño" },
+  { name: "Jabón neutro hipoalergénico", category: "Baño", maxQuantity: 4 },
+  { name: "Shampoo sin lágrimas", category: "Baño", maxQuantity: 4 },
+  { name: "Toallón de algodón con capucha", category: "Baño", maxQuantity: 4 },
 
   // Alimentación
-  { name: "Mamaderas", category: "Alimentación" },
-  { name: "Chupetes", category: "Alimentación", maxQuantity: 6 },
-  { name: "Extractor de leche", category: "Alimentación" },
-  { name: "Esterilizador o calentador de biberones", category: "Alimentación" },
-  { name: "Preparador de comidas para bebé", category: "Alimentación" },
-  { name: "Paños para tomas", category: "Alimentación", maxQuantity: 6 },
+  { name: "Mamadera anticólico", category: "Alimentación", maxQuantity: 4 },
+  { name: "Tetinas de repuesto", category: "Alimentación", maxQuantity: 4 },
+  { name: "Esterilizador o kit para microondas", category: "Alimentación" },
+  { name: "Cepillo para mamaderas", category: "Alimentación" },
+  { name: "Baberos de tela", category: "Alimentación", maxQuantity: 8 },
+  { name: "Chupete ortodóntico + portachupetes", category: "Alimentación", maxQuantity: 6 },
 
-  // Paseo y viaje
-  { name: "Bolso / bolsa de pañales", category: "Paseo y viaje" },
-  { name: "Mochila portabebé", category: "Paseo y viaje" },
-  { name: "Cuna de viaje / corral portátil", category: "Paseo y viaje" },
-  { name: "Alfombra de juegos", category: "Paseo y viaje" },
-  { name: "Accesorios para el cochecito", category: "Paseo y viaje" },
+  // Dormir
+  { name: "Mantita de algodón liviana", category: "Dormir", maxQuantity: 4 },
+  { name: "Saco de dormir talle 0-6 meses", category: "Dormir", maxQuantity: 3 },
+  { name: "Lucecita de noche tenue", category: "Dormir" },
+  { name: "Libro de cuentos para leer antes de dormir", category: "Dormir", maxQuantity: 4 },
 
-  // Cuidado y seguridad
-  { name: "Bañera para bebé", category: "Cuidado y seguridad" },
-  { name: "Botiquín de primeros auxilios", category: "Cuidado y seguridad" },
-  { name: "Artículos de seguridad (protectores, traba puertas)", category: "Cuidado y seguridad" },
+  // Ropa
+  { name: "Bodies algodón talle 0-3 meses", category: "Ropa", maxQuantity: 8 },
+  { name: "Bodies / ranitas talle 3-6 meses", category: "Ropa", maxQuantity: 8 },
+  { name: "Conjuntos talle 6-9 meses", category: "Ropa", maxQuantity: 6 },
+  { name: "Medias y escarpines de algodón", category: "Ropa", maxQuantity: 8 },
+  { name: "Body o mantita con nombre bordado", category: "Ropa" },
 
-  // Otros
-  { name: "Libros de tela / sonajeros", category: "Otros", maxQuantity: 4 },
-  { name: "Juguetes de estimulación", category: "Otros" },
-  { name: "Tarjeta de regalo (por si no sabés qué elegir)", category: "Otros" },
+  // Paseo y maternidad
+  { name: "Bolso / pañalera maternal", category: "Paseo y maternidad" },
+  { name: "Mochila portabebés ergonómica", category: "Paseo y maternidad" },
+  { name: "Cambiador de viaje", category: "Paseo y maternidad" },
+
+  // Grandes
+  { name: "Cochecito", category: "Grandes" },
+  { name: "Butaca de auto", category: "Grandes" },
+  { name: "Practicuna / cuna de viaje", category: "Grandes" },
+  { name: "Hamaca (ej. Maxi-Cosi Kori)", category: "Grandes" },
+  { name: "Gimnasio infantil", category: "Grandes" },
+  { name: "Cámara de vigilancia para bebés", category: "Grandes" },
+
+  // Juguetes
+  { name: "Sonajero de tela", category: "Juguetes", maxQuantity: 4 },
+  { name: "Juguetes constructores / mordedores", category: "Juguetes", maxQuantity: 4 },
+
+  // Recuerdos
+  { name: "Álbum de fotos / mi primer año", category: "Recuerdos" },
+  { name: "Set de huellitas en cerámica", category: "Recuerdos" },
+  { name: "Tarta de pañales", category: "Recuerdos" },
+  { name: "Caja de cartas para el futuro", category: "Recuerdos" },
+  { name: "Tarjeta de regalo (por si no sabés qué elegir)", category: "Recuerdos" },
 ];
-
