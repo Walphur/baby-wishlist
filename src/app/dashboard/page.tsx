@@ -6,7 +6,7 @@ import CopyLinkButton from "@/components/CopyLinkButton";
 import InvitationCard from "@/components/InvitationCard";
 import InvitationSetup from "@/components/InvitationSetup";
 import SubmitButton from "@/components/SubmitButton";
-import { invitationTemplateId, isGeneratedInvitationUrl, formatInvitationTime } from "@/lib/invitation";
+import { invitationTemplateId, isGeneratedInvitationUrl, formatInvitationTime, formatRsvpConfirmBy } from "@/lib/invitation";
 import Link from "next/link";
 
 export const maxDuration = 60;
@@ -103,6 +103,7 @@ export default async function DashboardPage({
   const host = (await headers()).get("host");
   const protocol = host?.includes("localhost") ? "http" : "https";
   const publicLink = `${protocol}://${host}/e/${event.slug}`;
+  const confirmBy = formatRsvpConfirmBy(event.event_date);
 
   const { count: totalGifts } = await supabase
     .from("baby_gifts")
@@ -199,6 +200,13 @@ export default async function DashboardPage({
           </code>
           <CopyLinkButton link={publicLink} />
         </div>
+        {confirmBy ? (
+          <p className="mt-3 text-sm text-ink-700">
+            En el link les pedimos confirmar hasta el{" "}
+            <span className="font-medium text-ink-900">{confirmBy}</span>, 15 días
+            antes de la fecha del evento.
+          </p>
+        ) : null}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">

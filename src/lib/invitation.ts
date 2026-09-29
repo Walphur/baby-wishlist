@@ -204,6 +204,22 @@ export function formatInvitationDate(isoDate: string | null | undefined) {
   return formatted.charAt(0).toUpperCase() + formatted.slice(1);
 }
 
+/** Días de anticipación para confirmar asistencia. */
+export const RSVP_CONFIRM_DAYS_BEFORE = 15;
+
+/** Fecha límite de confirmación: 15 días antes de la fecha del evento. */
+export function formatRsvpConfirmBy(eventDate: string | null | undefined) {
+  if (!eventDate) return null;
+  const date = new Date(`${eventDate}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return null;
+  date.setDate(date.getDate() - RSVP_CONFIRM_DAYS_BEFORE);
+  return date.toLocaleDateString("es-AR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
 /** Hora HH:MM (24h o del input type=time) → "16:30 hs". */
 export function formatInvitationTime(time: string | null | undefined) {
   if (!time) return "";

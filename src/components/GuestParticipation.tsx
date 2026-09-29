@@ -19,12 +19,14 @@ type Props = {
   slug: string;
   gifts: GiftWithClaim[];
   askPartySize?: boolean;
+  confirmBy?: string | null;
 };
 
 export default function GuestParticipation({
   slug,
   gifts,
   askPartySize = true,
+  confirmBy = null,
 }: Props) {
   const formRef = useRef<HTMLFormElement>(null);
   const [isPending, startTransition] = useTransition();
@@ -374,6 +376,13 @@ export default function GuestParticipation({
           Marcá arriba lo que te gustaría llevar (podés cambiarlo cuando quieras) y
           confirmá acá al final.
         </p>
+        {confirmBy ? (
+          <p className="mt-2 text-sm text-ink-800">
+            Tenés que confirmar hasta el{" "}
+            <span className="font-medium">{confirmBy}</span>, 15 días antes del
+            evento.
+          </p>
+        ) : null}
 
         {selectedLabels.length > 0 && (
           <div className="mt-3 rounded-xl border border-sage-200 bg-sage-50/80 px-3 py-2 text-sm text-sage-800">

@@ -7,6 +7,7 @@ import FloatingBear from "@/components/FloatingBear";
 import InvitationCard from "@/components/InvitationCard";
 import {
   formatInvitationTime,
+  formatRsvpConfirmBy,
   invitationTemplateId,
   isGeneratedInvitationUrl,
 } from "@/lib/invitation";
@@ -79,6 +80,7 @@ export default async function EventPage({
     ? formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1)
     : null;
   const formattedTime = formatInvitationTime(event.event_time);
+  const confirmBy = formatRsvpConfirmBy(event.event_date);
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-14">
@@ -130,6 +132,13 @@ export default async function EventPage({
             {event.message ? (
               <p className="mt-3 text-sm italic leading-relaxed text-ink-800">
                 “{event.message}”
+              </p>
+            ) : null}
+            {confirmBy ? (
+              <p className="mt-4 border-t border-sage-200/80 pt-3 text-sm leading-relaxed text-ink-800">
+                Tenés que confirmar asistencia hasta el{" "}
+                <span className="font-medium text-ink-900">{confirmBy}</span>
+                , 15 días antes del evento.
               </p>
             ) : null}
           </div>
@@ -191,6 +200,7 @@ export default async function EventPage({
           slug={params.slug}
           gifts={giftsWithClaim}
           askPartySize={event.ask_party_size}
+          confirmBy={confirmBy}
         />
       </div>
     </main>
