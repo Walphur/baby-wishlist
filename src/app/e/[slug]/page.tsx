@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import DisclaimerBanner from "@/components/DisclaimerBanner";
@@ -6,6 +7,7 @@ import DecorativeBlobs from "@/components/DecorativeBlobs";
 import FloatingBear from "@/components/FloatingBear";
 import InvitationCard from "@/components/InvitationCard";
 import {
+  formatInvitationDate,
   formatInvitationTime,
   formatRsvpConfirmBy,
   invitationTemplateId,
@@ -13,6 +15,72 @@ import {
 } from "@/lib/invitation";
 
 export const dynamic = "force-dynamic";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://baby-wishlist.online";
+
+function shortHash(value: string) {
+  let hash = 0;
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash * 31 + value.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash).toString(36);
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
+  const supabase = createAdminClient();
+  const { data: event } = await supabase
+    .from("baby_events")
+    .select("baby_name, event_date, event_time, location, host_names, invitation_image_url")
+    .eq("slug", params.slug)
+    .maybeSingle();
+
+  if (!event) return { title: "Baby Shower" };
+
+  const title = event.baby_name
+    ? `Baby Shower de ${event.baby_name}`
+    : "¡Estás invitado/a a nuestro Baby Shower!";
+
+  const confirmBy = formatRsvpConfirmBy(event.event_date);
+  const when = [
+    formatInvitationDate(event.event_date).toLowerCase(),
+    formatInvitationTime(event.event_time),
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const description = [
+    confirmBy ? `Confirmá tu asistencia hasta el ${confirmBy}.` : "Confirmá tu asistencia.",
+    when ? `Te esperamos el ${when}${event.location ? ` en ${event.location}` : ""}.` : null,
+    event.host_names ? `Con cariño, ${event.host_names}.` : null,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const pageUrl = `${SITE_URL}/e/${params.slug}`;
+  const imageUrl = `${pageUrl}/og?v=${shortHash(event.invitation_image_url ?? "bear")}`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      type: "website",
+      url: pageUrl,
+      title,
+      description,
+      locale: "es_AR",
+      images: [{ url: imageUrl, width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [imageUrl],
+    },
+  };
+}
 
 export default async function EventPage({
   params,
