@@ -6,7 +6,13 @@ import CopyLinkButton from "@/components/CopyLinkButton";
 import InvitationCard from "@/components/InvitationCard";
 import InvitationSetup from "@/components/InvitationSetup";
 import SubmitButton from "@/components/SubmitButton";
-import { invitationTemplateId, isGeneratedInvitationUrl, formatInvitationTime, formatRsvpConfirmBy } from "@/lib/invitation";
+import {
+  invitationShareVersion,
+  invitationTemplateId,
+  isGeneratedInvitationUrl,
+  formatInvitationTime,
+  formatRsvpConfirmBy,
+} from "@/lib/invitation";
 import Link from "next/link";
 
 export const maxDuration = 60;
@@ -102,7 +108,9 @@ export default async function DashboardPage({
 
   const host = (await headers()).get("host");
   const protocol = host?.includes("localhost") ? "http" : "https";
-  const publicLink = `${protocol}://${host}/e/${event.slug}`;
+  const publicLink = `${protocol}://${host}/e/${event.slug}?v=${invitationShareVersion(
+    event.invitation_image_url
+  )}`;
   const confirmBy = formatRsvpConfirmBy(event.event_date);
 
   const { count: totalGifts } = await supabase

@@ -10,6 +10,7 @@ import {
   formatInvitationDate,
   formatInvitationTime,
   formatRsvpConfirmBy,
+  invitationShareVersion,
   invitationTemplateId,
   isGeneratedInvitationUrl,
 } from "@/lib/invitation";
@@ -17,14 +18,6 @@ import {
 export const dynamic = "force-dynamic";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://baby-wishlist.online";
-
-function shortHash(value: string) {
-  let hash = 0;
-  for (let i = 0; i < value.length; i++) {
-    hash = (hash * 31 + value.charCodeAt(i)) | 0;
-  }
-  return Math.abs(hash).toString(36);
-}
 
 export async function generateMetadata({
   params,
@@ -60,7 +53,7 @@ export async function generateMetadata({
     .join(" ");
 
   const pageUrl = `${SITE_URL}/e/${params.slug}`;
-  const imageUrl = `${pageUrl}/og?v=${shortHash(event.invitation_image_url ?? "bear")}`;
+  const imageUrl = `${pageUrl}/og?v=${invitationShareVersion(event.invitation_image_url)}`;
 
   return {
     title,

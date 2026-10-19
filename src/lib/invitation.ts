@@ -220,6 +220,19 @@ export function formatRsvpConfirmBy(eventDate: string | null | undefined) {
   });
 }
 
+/**
+ * WhatsApp cachea la vista previa por URL exacta: la versión cambia cuando
+ * cambia la tarjeta o el texto de la vista previa, así el link compartido se vuelve a leer.
+ */
+export function invitationShareVersion(invitationImageUrl: string | null | undefined) {
+  const value = `og2:${invitationImageUrl ?? "bear"}`;
+  let hash = 0;
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash * 31 + value.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash).toString(36);
+}
+
 /** Hora HH:MM (24h o del input type=time) → "16:30 hs". */
 export function formatInvitationTime(time: string | null | undefined) {
   if (!time) return "";
